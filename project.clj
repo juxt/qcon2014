@@ -14,5 +14,7 @@
                  [jig/stencil ~jig-version]
                  ]
 
+  :source-paths ["src" "src-cljs"]
+
 
 )
