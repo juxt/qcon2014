@@ -1,9 +1,15 @@
 {:jig/components
  {
+  :stencil-loader
+  {
+   :jig/component jig.stencil/StencilLoader
+   :jig/project "../qcon/project.clj"}
+
   :website
   {:jig/component qcon.web/Website
    :jig/project "../qcon/project.clj"
-   :jig/dependencies []}
+   :jig/dependencies [:stencil-loader]
+   }
 
   #_:cljs-builder
   #_{:jig/component jig.cljs-builder/Builder

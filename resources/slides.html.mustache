@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <title>{{title}}</title>
+    <meta name="viewport" content="width=1024, user-scalable=no">
+
+    <link rel="stylesheet" href="/font-awesome-4.0.3/css/font-awesome.min.css">
+
+    <!--
+        These are copied in from deck.js' boilerplate.html
+
+        As of December 2013, deck.js looks fairly mature and has
+        recently reached 1.0.
+
+        Paths are prefixed with deck.js to help with routing.
+
+        Component config needs an entry :deck-js-path to the file path
+        of the working tree of a cloned deck.js git repo. This has all
+        the required dependency files, including jquery.min.js
+      -->
+
+
+    <link rel="stylesheet" href="/deck.js/core/deck.core.css">
+
+    <!-- Extension CSS files go here. Remove or add as needed. -->
+    <link rel="stylesheet" media="screen" href="/deck.js/extensions/goto/deck.goto.css">
+    <link rel="stylesheet" media="screen" href="/deck.js/extensions/menu/deck.menu.css">
+    <link rel="stylesheet" media="screen" href="/deck.js/extensions/navigation/deck.navigation.css">
+    <link rel="stylesheet" media="screen" href="/deck.js/extensions/status/deck.status.css">
+    <link rel="stylesheet" media="screen" href="/deck.js/extensions/hash/deck.hash.css">
+    <link rel="stylesheet" media="screen" href="/deck.js/extensions/scale/deck.scale.css">
+
+    <!-- Style theme. More available in /themes/style/ or create your
+         own. -->
+
+<!--    <link rel="stylesheet" media="screen" href="/deck.js/themes/style/web-2.0.css">
+-->
+    <link rel="stylesheet" media="screen" href="/deck.js/themes/style/neon.css">
+
+    <!-- Transition theme. More available in /themes/transition/ or
+         create your own. -->
+    <link rel="stylesheet" media="screen" href="/deck.js/themes/transition/fade.css">
+    <!--
+    <link rel="stylesheet" media="screen" href="/deck.js/themes/transition/horizontal-slide.css">
+    -->
+
+    <!-- Basic black and white print styles -->
+    <link rel="stylesheet" media="print" href="/deck.js/core/print.css">
+
+<style>
+@font-face {
+font-family: JLSData;
+src: url("/JLSDataGothicC_NC.otf") format("opentype");
+}
+
+@font-face {
+font-family: Awesome;
+src: url("/FontAwesome.otf") format("opentype");
+}
+
+@font-face {
+font-family: Checkbook;
+src: url("/Checkbook.ttf") format("truetype");
+}
+
+figure { text-align: center; }
+svg path, svg polygon, svg ellipse { stroke-width: 2px }
+#example-device path:hover { fill: yellow }
+
+ul { list-style-type: none }
+
+section img {
+    box-shadow: 10px 10px 15px #222 !important;
+    padding: 10px;
+    margin-right: 20px;
+    background: #888;
+}
+
+h1 {
+    font-size: 64pt;
+}
+
+.juxt {
+font-size: 140%;
+font-family: "Bowlby One SC";
+}
+
+figure#config path:hover { fill: yellow }
+
+#logoarea { width: 95%; margin-top: 0px }
+
+#logoarea circle {
+  box-shadow: 0 0 20px #f0a, 0 0 5px #fff;
+}
+
+svg { width: 95% }
+
+ul li { font-size: 34pt }
+
+#ending p
+{ font-size: 52pt; text-align: center }
+
+#countup { font-family: monospace; }
+
+.vidcontainer { position: relative; height: 900; }
+.vidcontainer video { position: relative; height: 900; z-index: 0; border: 1x solid white }
+
+.vidcontainer img { position: relative; height: 900; z-index: 0; border: 1x solid white }
+
+.overlay p.title {
+  position: absolute;
+  top: 380px;
+  left: 220px;
+  z-index: 1;
+  background-color: black;
+  font-family: Checkbook;
+}
+
+.overlay p.date {
+  position: absolute;
+  top: 420px;
+  left: 380px;
+  z-index: 1;
+  background-color: black;
+  font-family: Checkbook;
+  font-size: 80px;
+}
+
+.overlay p {
+  text-align: center;
+}
+
+.overlay svg {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 1;
+}
+
+</style>
+
+
+<!-- Syntax highlighter -->
+
+    <script type="text/javascript" src="/sh/scripts/shCore.js"></script>
+    <script type="text/javascript" src="/sh/scripts/shBrushJScript.js"></script>
+    <script type="text/javascript" src="/sh/scripts/shBrushClojure.js"></script>
+    <link type="text/css" rel="stylesheet" href="/sh/styles/shCoreDefault.css"/>
+    <link type="text/css" rel="stylesheet" href="/sh/styles/shThemeEmacs.css"/>
+    <link type="text/css" rel="stylesheet" href="/sh/styles/shClojureExtra.css"/>
+    <script type="text/javascript">SyntaxHighlighter.all();</script>
+
+
+    <!-- Required Modernizr file -->
+    <script src="/deck.js/modernizr.custom.js"></script>
+
+
+
+  </head>
+
+  <body>
+
+    <div id="content" class="deck-container">
+
+      <!-- TODO Break up into slides -->
+      {{{content}}}
+
+      <!-- End slides. -->
+
+      <!-- Begin extension snippets. Add or remove as needed. -->
+      <!-- End extension snippets. -->
+    </div>
+
+    <!-- Required JS files. -->
+    <script src="/deck.js/jquery.min.js"></script>
+    <script src="/deck.js/core/deck.core.js"></script>
+
+    <!-- Extension JS files. Add or remove as needed. -->
+    <script src="/deck.js/extensions/hash/deck.hash.js"></script>
+    <script src="/deck.js/extensions/menu/deck.menu.js"></script>
+    <script src="/deck.js/extensions/goto/deck.goto.js"></script>
+    <script src="/deck.js/extensions/status/deck.status.js"></script>
+    <script src="/deck.js/extensions/navigation/deck.navigation.js"></script>
+    <script src="/deck.js/extensions/scale/deck.scale.js"></script>
+
+    <!-- Initialize the deck. You can put this in an external file if desired. -->
+    <script>
+      $(function() {
+      $.deck('.slide');
+      });
+
+    </script>
+
+    <!-- ClojureScript imports -->
+    <script src="js/goog/base.js" type="text/javascript"></script>
+    <script src="js/main.js" type="text/javascript"></script>
+
+
+    <script>
+          $(document).bind('deck.change', function(event, from, to) {
+            console.log("Slide change from " + from + " to " + to);
+            opensensors.tuner.slidechange(from, to);
+          });
+    </script>
+
+    <script type="text/javascript">goog.require("{{main}}");</script>
+
+
+
+
+  </body>
+</html>

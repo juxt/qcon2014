@@ -11,6 +11,7 @@
                  [jig/cljs-builder ~jig-version]
                  [jig/http-kit ~jig-version]
                  [jig/bidi ~jig-version]
+                 [jig/stencil ~jig-version]
                  ]
 
 
