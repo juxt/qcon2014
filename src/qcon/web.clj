@@ -2,21 +2,22 @@
   (:require
    [bidi.bidi :refer (->Redirect)]
    [jig.bidi :refer (add-bidi-routes)]
+   [clojure.java.io :as io]
    [stencil.core :as stencil]
    [jig.util :refer (satisfying-dependency)]
    jig)
   (:import (jig Lifecycle))
   )
 
-(defn index-page [loader]
+(defn index-page [loader plan]
   (assert loader "Loader is nil")
   (fn [req]
     (assert (loader "slides.html") (format "Can't find slides.html, loader is %s" loader))
-    {:status 200 :body (stencil/render (loader "slides.html") {:content "Hello QCon!"})}))
+    {:status 200 :body (stencil/render (loader "slides.html") {:content (slurp plan)})}))
 
-(defn make-handlers [loader]
+(defn make-handlers [loader plan]
   (let [p (promise)]
-    @(deliver p {:index (index-page loader)})))
+    @(deliver p {:index (index-page loader plan)})))
 
 (defn make-routes [handlers]
   ["/"
@@ -38,8 +39,11 @@
   Lifecycle
   (init [_ system] system)
   (start [_ system]
-    (let [loader (get-template-loader system config)]
+
+    (clojure.pprint/pprint config)
+    (let [loader (get-template-loader system config)
+          plan (io/file (-> config :jig/project :project-file (.getParentFile)) "plan.org")]
       (-> system
           (assoc :loader loader)
-          (add-bidi-routes config (make-routes (make-handlers loader))))))
+          (add-bidi-routes config (make-routes (make-handlers loader plan))))))
   (stop [_ system] system))
