@@ -1,6 +1,6 @@
 (ns qcon.web
   (:require
-   [bidi.bidi :refer (->Redirect)]
+   [bidi.bidi :refer (->Redirect ->Resources) :as bidi]
    [jig.bidi :refer (add-bidi-routes)]
    [clojure.java.io :as io]
    [stencil.core :as stencil]
@@ -25,7 +25,8 @@
 (defn make-routes [handlers]
   ["/"
    [["index.html" (:index handlers)]
-    ["" (->Redirect 307 (:index handlers))]]])
+    ["" (->Redirect 307 (:index handlers))]
+    ["static/" (->Resources {:prefix ""})]]])
 
 (defn get-template-loader [system config]
   (if-let [{id :jig/id} (satisfying-dependency system config 'jig.stencil/StencilLoader)]

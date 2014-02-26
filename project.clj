@@ -12,6 +12,9 @@
                  [jig/http-kit ~jig-version]
                  [jig/bidi ~jig-version]
                  [jig/stencil ~jig-version]
+                 [jig/async ~jig-version]
+                 [om "0.5.0"]
+                 [cljs-ajax "0.2.3"]
                  ]
 
   :source-paths ["src" "src-cljs"]
