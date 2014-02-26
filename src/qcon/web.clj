@@ -13,7 +13,10 @@
   (assert loader "Loader is nil")
   (fn [req]
     (assert (loader "slides.html") (format "Can't find slides.html, loader is %s" loader))
-    {:status 200 :body (stencil/render (loader "slides.html") {:content (slurp plan)})}))
+    {:status 200 :body (stencil/render (loader "slides.html")
+                                       {:content (slurp plan)
+                                        :title "QCon Presentation"
+                                        :main "qcon.main"})}))
 
 (defn make-handlers [loader plan]
   (let [p (promise)]

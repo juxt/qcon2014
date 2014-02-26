@@ -24,7 +24,7 @@
   :cljs-server
   {:jig/component jig.bidi/ClojureScriptRouter
    :jig/dependencies [:cljs-builder]
-   :jig.web/context "/cljs-js/"
+   :jig.web/context "/js/"
    }
 
   :routing
