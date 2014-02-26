@@ -39,8 +39,6 @@
   Lifecycle
   (init [_ system] system)
   (start [_ system]
-
-    (clojure.pprint/pprint config)
     (let [loader (get-template-loader system config)
           plan (io/file (-> config :jig/project :project-file (.getParentFile)) "plan.org")]
       (-> system
