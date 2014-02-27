@@ -3,35 +3,43 @@
   (:require
    [om.core :as om :include-macros true]
    [om.dom :as dom :include-macros true]
+   [sablono.core :as html :refer-macros [html]]
    [cljs.core.async :refer [<! >! chan put! sliding-buffer close! pipe map< filter<]]
    [ajax.core :refer (GET POST)]))
 
 (enable-console-print!)
 
 (def app-model
-  (atom {:counters [{:title "Introduction"
-                     :text "This is the introduction"}
-                    {:title "Slide 1"
-                     :text "Here is the first slide"}
-                    {:title "Slide 2"}
-                    {:title "Slide 3"}]}))
+  (atom {:current-slide 1
+         :slides [{:id 1
+                   :title "Introduction"
+                   :text "This is the introduction"}
+                  {:id 2
+                   :title "Slide 1"
+                   :text "Here is the first slide"}
+                  {:id 3
+                   :title "Slide 2"}
+                  {:id 4
+                   :title "Slide 3"}]}))
 
 
-(defn slide [data owner]
+(defn slide [data owner current]
   (reify
     om/IRender
     (render [_]
-      (dom/div nil
-               (dom/h2 nil (:title data))
-               (dom/p nil (:text data))))))
+      (html
+       [:div {:style {:visibility (if (= current (:id data)) "visible" "hidden")}}
+        [:h2 {:style {:color "green"}} (:title data)]
+        [:p (:text data)]]))))
 
 (defn slides [app owner]
   (reify
     om/IRenderState
     (render-state [_ {:keys [message chans]}]
-      (apply dom/div nil
-             (dom/p nil "There are the slides")
-             (om/build-all slide (:counters app)
-                           {:key :id :init-state chans})))))
+      (html
+       [:div
+        (om/build-all slide
+                      (:slides app)
+                      {:key :id :init-state chans :opts (:current-slide app)})]))))
 
 (om/root slides app-model {:target (.getElementById js/document "content")})
