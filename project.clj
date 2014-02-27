@@ -5,7 +5,13 @@
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
+
+  :exclusions [
+               org.clojure/clojurescript
+]
+
   :dependencies [
+                 [org.clojure/clojurescript "0.0-2156"]
                  [org.clojure/clojure "1.5.1"]
                  [jig/protocols ~jig-version]
                  [jig/cljs-builder ~jig-version]

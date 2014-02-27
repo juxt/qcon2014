@@ -8,8 +8,27 @@
 
 (enable-console-print!)
 
-(println "Hello QCon!")
+(println "Hello QCon!!!!")
 
-#_(def app-model {})
+(def app-model {:slides
+                [{:title "Introduction"}
+                 {:title "Slide 1"}
+                 {:title "Slide 2"}
+                 {:title "Slide 3"}]})
 
-#_(om/root )
+(defn slide [data owner]
+  (om/component
+   (dom/p nil "SLIDE 1")))
+
+(defn slides [data owner]
+  (om/component
+   (dom/div nil
+            (om/build slide data))))
+
+(defn nav [data owner]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/div nil (dom/p nil "NAV")))))
+
+(om/root slides app-model {:target (.getElementById js/document "content")})
