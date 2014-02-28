@@ -21,6 +21,7 @@
                  [jig/async ~jig-version]
                  [om "0.5.0"]
                  [sablono "0.2.6"]
+                 [ankha "0.1.1"]
                  [cljs-ajax "0.2.3"]
                  ]
 
