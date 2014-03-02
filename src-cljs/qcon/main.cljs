@@ -13,32 +13,40 @@
 
 (def debug false)
 
+(defn builder []
+  [:p "hello, i've been built by a builder"])
+
+(defn diagram-1 []
+  [:svg {:version "1.1" :width 600 :height 600}
+                [:text {:x 200 :y 100} "(>! (chan))"]
+                [:rect {:x 0 :y 0 :width 200 :height 200 :style {:fill "blue"}}]
+                [:rect {:x 50 :y 20 :width 100 :height 300 :style {:fill "red"}}]])
+
 (def app-model
-  (atom {:current-slide 4
+  (atom {:current-slide 1
          :slides
          [{:title "core.async"
            }
           {:title "Why?"
            ;;:text "Here is the first slide"
-           :background "/static/cspdiag.jpg"
-           }
-          {:title "Arch"
-           ;;:text "Here is the first slide"
-           :background "/static/arch.jpg"
-           }
-          {:title "Sunset"
-           ;;:text "Here is the first slide"
-           :background "/static/sunset.jpg"
+           ;;:background "/static/cspdiag.jpg"
+           :content [:ul
+                     {:li "One"}
+                     {:li "Two"}]
            }
           {:title "What?"}
           {:title "Buffers"
            :code "(<! (chan))"
            }
           {:title "Diagram"
-           :custom true
+           :builder builder
+           }
+          {:title "SVG Diagram"
+           :builder diagram-1
            }
           {:title "When?"
            }]}))
+
 
 (defn slide [data owner current]
   (reify
@@ -62,8 +70,19 @@
                       :width "100%"
                       :height "100%"}})
 
-           [:h2 (:title data)]
-           [:p (:text data)]
+           (if-not (or (:content data) (:builder data))
+             [:h1 (:title data)]
+             [:h2 (:title data)]
+             )
+
+           (when-let [builder (:builder data)]
+             (builder)
+             )
+
+           #_[:p (:text data)]
+           #_(when-let [content (:content data)]
+             (apply vec content)
+             )
            (when-let [code (:code data)]
              [:pre code]
              )
