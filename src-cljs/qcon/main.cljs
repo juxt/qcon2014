@@ -6,24 +6,43 @@
    [om.dom :as dom :include-macros true]
    [sablono.core :as html :refer-macros [html]]
    [ankha.core :as ankha]
-   [cljs.core.async :refer [<! >! chan put! sliding-buffer close! pipe map< filter<]]
+   [cljs.core.async :refer [<! >! buffer chan put! sliding-buffer close! pipe map< filter<]]
    [ajax.core :refer (GET POST)]))
 
 (enable-console-print!)
 
 (def debug false)
 
-(defn builder []
+(defn builder [data owner]
   [:p "hello, i've been built by a builder"])
 
-(defn diagram-1 []
-  [:svg {:version "1.1" :width 600 :height 600}
-                [:text {:x 200 :y 100} "(>! (chan))"]
-                [:rect {:x 0 :y 0 :width 200 :height 200 :style {:fill "blue"}}]
-                [:rect {:x 50 :y 20 :width 100 :height 300 :style {:fill "red"}}]])
+(def buf1 (buffer 10))
+(def chan1 (chan buf1))
+
+(defn diagram-1 [data owner]
+  [:div
+   [:button {:style {:font-size "60pt"}
+             :onClick (fn [_]
+                        (go
+                          (>! chan1 (rand-int 10))
+                          (println "Click!!" (str (-count buf1)))
+                          (println "array!!" (.-arr (.-buf buf1)))))
+             } ">!"]
+   [:button {:style {:font-size "60pt"}
+             :onClick (fn [_]
+                        (go
+                          (println "Take:" (<! chan1))
+                          (println "Click!!" (str (-count buf1)))
+                          (println "array!!" (.-arr (.-buf buf1)))))
+             } "<!"]
+   (println "update slide, array is" (.-arr (.-buf buf1)))
+   [:svg {:version "1.1" :width 600 :height 600}
+    [:text {:x 200 :y 100} "(>! (chan))"]
+    [:rect {:x 0 :y 0 :width 200 :height 200 :style {:fill "blue"}}]
+    [:rect {:x 50 :y 20 :width 100 :height 300 :style {:fill "red"}}]]])
 
 (def app-model
-  (atom {:current-slide 1
+  (atom {:current-slide 5
          :slides
          [{:title "core.async"
            }
@@ -76,7 +95,7 @@
              )
 
            (when-let [builder (:builder data)]
-             (builder)
+             (builder data owner)
              )
 
            #_[:p (:text data)]
