@@ -1,6 +1,6 @@
 (ns qcon.web
   (:require
-   [bidi.bidi :refer (->Redirect ->Resources) :as bidi]
+   [bidi.bidi :refer (->Redirect ->Resources ->Files) :as bidi]
    [jig.bidi :refer (add-bidi-routes)]
    [clojure.java.io :as io]
    [stencil.core :as stencil]
@@ -22,11 +22,13 @@
   (let [p (promise)]
     @(deliver p {:index (index-page loader plan)})))
 
-(defn make-routes [handlers]
+(defn make-routes [config handlers]
   ["/"
    [["index.html" (:index handlers)]
     ["" (->Redirect 307 (:index handlers))]
-    ["static/" (->Resources {:prefix ""})]]])
+    ["deck.js/" (->Files {:dir (:deckjs.dir config)})]
+    ["static/" (->Resources {:prefix ""})]
+    ]])
 
 (defn get-template-loader [system config]
   (if-let [{id :jig/id} (satisfying-dependency system config 'jig.stencil/StencilLoader)]
@@ -47,5 +49,5 @@
           plan (io/file (-> config :jig/project :project-file (.getParentFile)) "plan.org")]
       (-> system
           (assoc :loader loader)
-          (add-bidi-routes config (make-routes (make-handlers loader plan))))))
+          (add-bidi-routes config (make-routes config (make-handlers loader plan))))))
   (stop [_ system] system))

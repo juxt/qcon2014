@@ -9,6 +9,7 @@
   {:jig/component qcon.web/Website
    :jig/project "../qcon/project.clj"
    :jig/dependencies [:stencil-loader]
+   :deckjs.dir "../deck.js"
    }
 
   :cljs-builder
