@@ -21,59 +21,67 @@
 (def buf1 (buffer bufsize))
 (def chan1 (chan buf1))
 
+(def default-font "72pt")
+
+(println "Hello mod!" (mod 10 7))
+
 (defn diagram-1 [data owner]
   [:div
-   [:button {:style {:font-size "60pt"}
-             :onClick (fn [_]
-                        (go
-                          (>! chan1 (rand-int 10))
-                          (om/set-state! owner :modified (new js/Date))
-                          ))
-             } ">!"]
-
    [:svg {:version "1.1" :width 800 :height 600}
+    ;;[:rect {:x 0 :y 0 :width 800 :height 600 :fill "#333"}]
+
+    [:g {:transform "translate(70,65)"
+         :onClick (fn [_]
+                        (go
+                          (>! chan1 (str (rand-int 10)))
+                          (om/set-state! owner :modified (new js/Date))
+                          (.dir js/console buf1)))}
+
+     [:rect {:x 0 :y 0 :width 140 :height 100 :fill "black"}]
+     [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} ">!"]]
+
     (for [x (range bufsize)]
-      [:g
-       (let [radius 45]
-         [:g {:transform (str "translate(30,30)")}
-          [:g {:transform (str "translate(" (+ radius (* 2.4 radius x)) ") rotate(8)")}
-           [:circle {:cx 0 :cy radius :r radius :style {:fill "#44c"}}]
-           [:text {:x (- (/ radius 2)) :y (* 1.5 radius) :style {:font-size "60pt" :fill "white"}}
-            (str (aget (.-arr (.-buf buf1)) x))]]])]
-      )
-    ]
-   [:button {:style {:font-size "60pt"}
-             :onClick (fn [_]
+      (let [radius 50]
+        [:g {:transform (str "translate(320,320)")}
+         [:g {:transform (str "rotate(" (- (* (- x (/ bufsize 2) (- 1)) (/ 180 bufsize))) ") translate(200)")}
+          [:circle {:cx 0 :cy radius :r radius :style {:fill "#224"}}]
+          [:text {:x (- 0 (/ radius 2) 5) :y (* 1.7 radius) :style {:font-size default-font :fill "white"}}
+           (str (aget (.-arr (.-buf buf1)) (mod (+ x (.-head (.-buf buf1))) bufsize)))]]]))
+
+    [:g {:transform "translate(70,475)"
+         :onClick (fn [_]
                         (go
                           (<! chan1)
-                          (om/set-state! owner :modified (new js/Date))))
-             } "<!"]])
+                          (om/set-state! owner :modified (new js/Date))))}
+     [:rect {
+             :x 0 :y 0 :width 140 :height 100 :fill "black"}]
+     [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} "<!"]]]])
+
 
 (def app-model
   (atom {:current-slide 5
          :slides
-         [{:title "core.async"
-           }
+         [{:title "core.async"}
+
           {:title "Why?"
            ;;:text "Here is the first slide"
            ;;:background "/static/cspdiag.jpg"
            :content [:ul
                      {:li "One"}
-                     {:li "Two"}]
-           }
-          {:title "What?"}
-          {:title "Buffers"
-           :code "(<! (chan))"
-           }
-          {:title "Diagram"
-           :builder builder
-           }
-          {:title "put and take"
-           :builder diagram-1
-           }
-          {:title "When?"
-           }]}))
+                     {:li "Two"}]}
 
+          {:title "What?"}
+
+          {:title "Buffers"
+           :code "(<! (chan))"}
+
+          {:title "Diagram"
+           :builder builder}
+
+          {:title "put and take"
+           :builder diagram-1}
+
+          {:title "When?"}]}))
 
 (defn slide [data owner current]
   (reify
