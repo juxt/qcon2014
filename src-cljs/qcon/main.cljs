@@ -16,7 +16,9 @@
 (defn builder [data owner]
   [:p "hello, i've been built by a builder"])
 
-(def buf1 (buffer 10))
+(def bufsize 7)
+
+(def buf1 (buffer bufsize))
 (def chan1 (chan buf1))
 
 (defn diagram-1 [data owner]
@@ -28,20 +30,24 @@
                           (om/set-state! owner :modified (new js/Date))
                           ))
              } ">!"]
+
+   [:svg {:version "1.1" :width 800 :height 600}
+    (for [x (range bufsize)]
+      [:g
+       (let [radius 45]
+         [:g {:transform (str "translate(30,30)")}
+          [:g {:transform (str "translate(" (+ radius (* 2.4 radius x)) ") rotate(8)")}
+           [:circle {:cx 0 :cy radius :r radius :style {:fill "#44c"}}]
+           [:text {:x (- (/ radius 2)) :y (* 1.5 radius) :style {:font-size "60pt" :fill "white"}}
+            (str (aget (.-arr (.-buf buf1)) x))]]])]
+      )
+    ]
    [:button {:style {:font-size "60pt"}
              :onClick (fn [_]
                         (go
                           (<! chan1)
                           (om/set-state! owner :modified (new js/Date))))
-             } "<!"]
-   [:svg {:version "1.1" :width 600 :height 600}
-    [:text {:x 200 :y 100} "(>! (chan))"]
-    (for [x (range 10)]
-      [:g
-       [:rect {:x (* 60 x) :y 0 :width 40 :height 40 :style {:fill "blue"}}]
-       [:text {:x (* 60 x) :y 20} (str "h" (aget (.-arr (.-buf buf1)) x))]]
-      )
-    ]])
+             } "<!"]])
 
 (def app-model
   (atom {:current-slide 5
@@ -62,7 +68,7 @@
           {:title "Diagram"
            :builder builder
            }
-          {:title "SVG Diagram"
+          {:title "put and take"
            :builder diagram-1
            }
           {:title "When?"
