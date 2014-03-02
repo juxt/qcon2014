@@ -25,21 +25,23 @@
              :onClick (fn [_]
                         (go
                           (>! chan1 (rand-int 10))
-                          (println "Click!!" (str (-count buf1)))
-                          (println "array!!" (.-arr (.-buf buf1)))))
+                          (om/set-state! owner :modified (new js/Date))
+                          ))
              } ">!"]
    [:button {:style {:font-size "60pt"}
              :onClick (fn [_]
                         (go
-                          (println "Take:" (<! chan1))
-                          (println "Click!!" (str (-count buf1)))
-                          (println "array!!" (.-arr (.-buf buf1)))))
+                          (<! chan1)
+                          (om/set-state! owner :modified (new js/Date))))
              } "<!"]
-   (println "update slide, array is" (.-arr (.-buf buf1)))
    [:svg {:version "1.1" :width 600 :height 600}
     [:text {:x 200 :y 100} "(>! (chan))"]
-    [:rect {:x 0 :y 0 :width 200 :height 200 :style {:fill "blue"}}]
-    [:rect {:x 50 :y 20 :width 100 :height 300 :style {:fill "red"}}]]])
+    (for [x (range 10)]
+      [:g
+       [:rect {:x (* 60 x) :y 0 :width 40 :height 40 :style {:fill "blue"}}]
+       [:text {:x (* 60 x) :y 20} (str "h" (aget (.-arr (.-buf buf1)) x))]]
+      )
+    ]])
 
 (def app-model
   (atom {:current-slide 5
