@@ -11,7 +11,7 @@
 
 (enable-console-print!)
 
-(def debug true)
+(def debug false)
 
 (def app-model
   (atom {:current-slide 1
@@ -19,8 +19,8 @@
          [{:title "core.async"
            }
           {:title "Why?"
-           :text "Here is the first slide"
-           :background "/static/cspdiag.jpg"
+           ;;:text "Here is the first slide"
+           ;;           :background "/static/cspdiag.jpg"
            }
           {:title "What?"}
           {:title "Buffers"
@@ -38,20 +38,21 @@
     (render [_]
       (html
        [:section {:class (str "slide " (:class data))}
-        #_(when (:background data)
-            {:style {:background "url(/static/cspdiag.jpg)"}})
+        [:div {:class "deck-slide-scaler"}
+         #_(when (:background data)
+             {:style {:background "url(/static/cspdiag.jpg)"}})
 
-        [:h2 {:style {:color "green"}} (:title data)]
-        [:p (:text data)]
-        (when-let [code (:code data)]
-          [:pre code]
-          )
-        (when (:custom data)
-          [:svg {:version "1.1" :width 600 :height 600}
-           [:text {:x 200 :y 100} "(>! (chan))"]
-           [:rect {:x 0 :y 0 :width 200 :height 200 :style {:fill "blue"}}]
-           [:rect {:x 50 :y 20 :width 100 :height 300 :style {:fill "red"}}]]
-          )
+         [:h1 (:title data)]
+         [:p (:text data)]
+         (when-let [code (:code data)]
+           [:pre code]
+           )
+         #_(when (:custom data)
+           [:svg {:version "1.1" :width 600 :height 600}
+            [:text {:x 200 :y 100} "(>! (chan))"]
+            [:rect {:x 0 :y 0 :width 200 :height 200 :style {:fill "blue"}}]
+            [:rect {:x 50 :y 20 :width 100 :height 300 :style {:fill "red"}}]]
+           )]
         ]))))
 
 (defn set-slide-class! [app n max clz]
@@ -97,7 +98,7 @@
     (render [_]
       (html
        [:div
-        [:p (str "Current slide is " (inc (:current-slide app)) "/" (count (:slides app)))]
+        #_[:p (str "Current slide is " (inc (:current-slide app)) "/" (count (:slides app)))]
         (om/build-all slide
                       (:slides app)
                       {:key :title :init-state chans :opts (:current-slide app)})]))))
