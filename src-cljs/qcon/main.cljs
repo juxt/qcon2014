@@ -14,13 +14,21 @@
 (def debug false)
 
 (def app-model
-  (atom {:current-slide 1
+  (atom {:current-slide 4
          :slides
          [{:title "core.async"
            }
           {:title "Why?"
            ;;:text "Here is the first slide"
-           ;;           :background "/static/cspdiag.jpg"
+           :background "/static/cspdiag.jpg"
+           }
+          {:title "Arch"
+           ;;:text "Here is the first slide"
+           :background "/static/arch.jpg"
+           }
+          {:title "Sunset"
+           ;;:text "Here is the first slide"
+           :background "/static/sunset.jpg"
            }
           {:title "What?"}
           {:title "Buffers"
@@ -37,23 +45,35 @@
     om/IRender
     (render [_]
       (html
-       [:section {:class (str "slide " (:class data))}
-        [:div {:class "deck-slide-scaler"}
-         #_(when (:background data)
-             {:style {:background "url(/static/cspdiag.jpg)"}})
+       (if-let [bg (:background data)]
+         [:img {:class (str "slide " (:class data)) :src bg
+                :style {:width "100%"
+                        :height "100%"}}]
 
-         [:h1 (:title data)]
-         [:p (:text data)]
-         (when-let [code (:code data)]
-           [:pre code]
-           )
-         #_(when (:custom data)
-           [:svg {:version "1.1" :width 600 :height 600}
-            [:text {:x 200 :y 100} "(>! (chan))"]
-            [:rect {:x 0 :y 0 :width 200 :height 200 :style {:fill "blue"}}]
-            [:rect {:x 50 :y 20 :width 100 :height 300 :style {:fill "red"}}]]
-           )]
-        ]))))
+
+         [:section {:class (str "slide " (:class data))}
+          [:div {:class "deck-slide-scaler"}
+           (when-let [bg (:background data)]
+             {:style {:background-image bg
+                      :background-repeat "no-repeat"
+                      :background-position "center"
+                      :background-size "cover"
+                      :overflow "hidden"
+                      :width "100%"
+                      :height "100%"}})
+
+           [:h2 (:title data)]
+           [:p (:text data)]
+           (when-let [code (:code data)]
+             [:pre code]
+             )
+           #_(when (:custom data)
+               [:svg {:version "1.1" :width 600 :height 600}
+                [:text {:x 200 :y 100} "(>! (chan))"]
+                [:rect {:x 0 :y 0 :width 200 :height 200 :style {:fill "blue"}}]
+                [:rect {:x 50 :y 20 :width 100 :height 300 :style {:fill "red"}}]]
+               )]
+          ])))))
 
 (defn set-slide-class! [app n max clz]
   (when (and (not (neg? n))
