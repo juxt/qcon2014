@@ -11,10 +11,10 @@
 
 (enable-console-print!)
 
-(def debug false)
+(def debug true)
 
 (def app-model
-  (atom {:current-slide 4
+  (atom {:current-slide 1
          :slides
          [{:title "core.async"
            }
@@ -37,27 +37,38 @@
     om/IRender
     (render [_]
       (html
-       (if (:visible data)
-         [:div {:style {:display (if (:visible data) :block :none)}}
-          [:div
-           #_(when (:background data)
-               {:style {:background "url(/static/cspdiag.jpg)"}})
+       [:section {:class (str "slide " (:class data))}
+        #_(when (:background data)
+            {:style {:background "url(/static/cspdiag.jpg)"}})
 
-           [:h2 {:style {:color "green"}} (:title data)]
-           [:p (:text data)]
-           (when-let [code (:code data)]
-             [:pre code]
-             )
-           (when (:custom data)
-             [:svg {:version "1.1" :width 600 :height 600}
-              [:text {:x 200 :y 100} "(>! (chan))"]
-              [:rect {:x 0 :y 0 :width 200 :height 200 :style {:fill "blue"}}]
-              [:rect {:x 50 :y 20 :width 100 :height 300 :style {:fill "red"}}]]
-             )
-           ]]
+        [:h2 {:style {:color "green"}} (:title data)]
+        [:p (:text data)]
+        (when-let [code (:code data)]
+          [:pre code]
+          )
+        (when (:custom data)
+          [:svg {:version "1.1" :width 600 :height 600}
+           [:text {:x 200 :y 100} "(>! (chan))"]
+           [:rect {:x 0 :y 0 :width 200 :height 200 :style {:fill "blue"}}]
+           [:rect {:x 50 :y 20 :width 100 :height 300 :style {:fill "red"}}]]
+          )
+        ]))))
 
-         [:div {:style {:display :none}}]
-         )))))
+(defn set-slide-class! [app n max clz]
+  (when (and (not (neg? n))
+             (< n max))
+    (om/update! app [:slides n :class] clz)))
+
+(defn navigate-to-slide! [app n max]
+  (doseq [i (range max)]
+    (set-slide-class!
+     app i max
+     (cond
+      (= i n) "deck-current"
+      (= (- i n) 1) "deck-next"
+      (= (- i n) -1) "deck-previous"
+      (< i n) "deck-before"
+      (> i n) "deck-after"))))
 
 (defn slides [app owner]
   (reify
@@ -66,20 +77,22 @@
       (goog.events.listen
        js/document "keydown"
        (fn [e]
-         (om/transact! app [:slides (:current-slide @app)] #(dissoc % :visible))
          (cond
-          (= (.-keyCode e) kc/PAGE_UP)
+          (or (= (.-keyCode e) 37)
+              (= (.-keyCode e) kc/PAGE_UP))
           (when (pos? (:current-slide @app))
             (om/transact! app :current-slide dec))
-
-          (= (.-keyCode e) kc/PAGE_DOWN)
+          (or (= (.-keyCode e) 39)
+              (= (.-keyCode e) kc/PAGE_DOWN))
           (when (get-in @app [:slides (inc (:current-slide @app))])
             (om/transact! app :current-slide inc)))
 
-         ;; Make initial slide visible
-         (om/update! app [:slides (:current-slide @app) :visible] true)))
+         (navigate-to-slide! app (:current-slide @app) (count (:slides @app)))))
 
-      (om/update! app [:slides (:current-slide app) :visible] true))
+      ;; Navigate to initial slide
+      (navigate-to-slide! app (:current-slide app) (count (:slides app)))
+      )
+
     om/IRender
     (render [_]
       (html
