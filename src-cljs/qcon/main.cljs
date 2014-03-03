@@ -23,12 +23,9 @@
 
 (def default-font "72pt")
 
-(println "Hello mod!" (mod 10 7))
-
-(defn diagram-1 [data owner]
+(defn fig-put-and-take [data owner]
   [:div
    [:svg {:version "1.1" :width 800 :height 600}
-    ;;[:rect {:x 0 :y 0 :width 800 :height 600 :fill "#333"}]
 
     [:g {:transform "translate(70,65)"
          :onClick (fn [_]
@@ -59,29 +56,53 @@
 
 
 (def app-model
-  (atom {:current-slide 5
+  (atom {:current-slide 3
          :slides
-         [{:title "core.async"}
+         [{:title "core.async"
+           :event "QCon 2014"
+           :author "Malcolm Sparks"
+           :company "JUXT"
+           :email "malcolm@juxt.pro"
+           :twitter "@malcolmsparks"
+           }
 
-          {:title "Why?"
+          {:subtitle "What is core.async?"
            ;;:text "Here is the first slide"
            ;;:background "/static/cspdiag.jpg"
-           :content [:ul
-                     {:li "One"}
-                     {:li "Two"}]}
+           :bullets ["Clojure library released May 2013"
+                     "Based on Communicating Sequential Processes"
+                     "Available in Clojure and ClojureScript"]
+           }
 
-          {:title "What?"}
+          {:title "Quick tutorial"}
+
+          {:title "put and take"
+           :builder fig-put-and-take}
 
           {:title "Buffers"
            :code "(<! (chan))"}
 
-          {:title "Diagram"
-           :builder builder}
-
-          {:title "put and take"
-           :builder diagram-1}
-
           {:title "When?"}]}))
+
+(defn source-snippet [data owner fname]
+  (reify
+    om/IWillMount
+    (will-mount [_]
+      (GET "/source"
+          (-> {:handler (fn [e]
+                          (println "Returned " e)
+                          (om/set-state! owner :text e))
+               :headers {"Accept" "text/plain"}
+               :response-format :raw})))
+    om/IRender
+    (render [_]
+      (html
+       [:pre ;; {:class "brush: clojure" :style {:width "95%"}}
+        (om/get-state owner :text)]))
+    #_om/IDidUpdate
+    #_(did-update [this prev-props prev-state]
+      (.setAttribute (-.class (om/get-node owner))  "brush: clojure")
+      #_(goog.dom.classes.add (om/get-node owner) "brush: clojure"))))
 
 (defn slide [data owner current]
   (reify
@@ -105,13 +126,33 @@
                       :width "100%"
                       :height "100%"}})
 
-           (if-not (or (:content data) (:builder data))
-             [:h1 (:title data)]
-             [:h2 (:title data)]
+           (when-let [title (:title data)]
+             [:h1 title]
+             )
+
+           (when-let [subtitle (:subtitle data)]
+             [:h2 subtitle]
              )
 
            (when-let [builder (:builder data)]
              (builder data owner)
+             )
+
+           (when-let [event (:event data)]
+             [:div {:style {:text-align "center" :margin-top "20pt"}}
+              [:h3 event]
+              [:h3 (:author data)]
+              [:h3 (:company data)]
+              [:h3 (:email data)]
+              [:h3 (:twitter data)]
+              ]
+             )
+
+           (when-let [bullets (:bullets data)]
+             [:ul {:style {:font-size "42pt"}}
+              (for [b bullets]
+                [:li b]
+                )]
              )
 
            #_[:p (:text data)]
@@ -119,7 +160,7 @@
              (apply vec content)
              )
            (when-let [code (:code data)]
-             [:pre code]
+             (om/build source-snippet data {:opts "filter"})
              )
            #_(when (:custom data)
                [:svg {:version "1.1" :width 600 :height 600}
