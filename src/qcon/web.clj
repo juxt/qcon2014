@@ -1,3 +1,4 @@
+;; Copyright © 2013, JUXT LTD. All Rights Reserved.
 (ns qcon.web
   (:require
    [bidi.bidi :refer (->Redirect ->Resources ->Files) :as bidi]

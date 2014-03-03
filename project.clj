@@ -2,17 +2,14 @@
 (def jig-version "2.0.2-SNAPSHOT")
 
 (defproject qcon "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
+  :description "Slides for Malcolm Sparks's core.async talk at QCon 2014"
+  :url "http://github.com/juxt/qcon"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
-  :exclusions [
-               org.clojure/clojurescript
-]
+  :exclusions [org.clojure/clojurescript]
 
-  :dependencies [
-                 [org.clojure/clojurescript "0.0-2156"]
+  :dependencies [[org.clojure/clojurescript "0.0-2156"]
                  [org.clojure/clojure "1.5.1"]
                  [jig/protocols ~jig-version]
                  [jig/cljs-builder ~jig-version]
@@ -29,6 +26,5 @@
                  ]
 
   :source-paths ["src" "src-cljs"]
-
 
 )

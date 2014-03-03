@@ -1,3 +1,4 @@
+;; Copyright © 2013, JUXT LTD. All Rights Reserved.
 (ns qcon.examples
   (:require [clojure.core.async :refer (chan buffer)]))
 

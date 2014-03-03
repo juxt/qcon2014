@@ -14,6 +14,8 @@
 
 (def debug false)
 
+;; A protocol for custom slides
+
 (defprotocol Slide
   (init-slide-state [_])
   (render-slide [_ data owner]))
