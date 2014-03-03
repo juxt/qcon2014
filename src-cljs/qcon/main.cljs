@@ -13,9 +13,6 @@
 
 (def debug false)
 
-(defn builder [data owner]
-  [:p "hello, i've been built by a builder"])
-
 (def bufsize 7)
 (def buf1 (buffer bufsize))
 (def chan1 (chan buf1))
@@ -81,7 +78,7 @@
           {:title "Quick tutorial"}
 
           {:subtitle "put and take"
-           :builder (PutAndTakeSlide.)}
+           :custom (PutAndTakeSlide.)}
 
           {:title "Buffers"
            :code "(<! (chan))"}
@@ -143,9 +140,9 @@
              [:h2 subtitle]
              )
 
-           (when-let [builder (:builder data)]
-             (when (satisfies? Slide (om/value builder))
-               (render-slide (om/value builder) data owner)))
+           (when-let [custom (:custom data)]
+             (when (satisfies? Slide (om/value custom))
+               (render-slide (om/value custom) data owner)))
 
            (when-let [event (:event data)]
              [:div {:style {:text-align "center" :margin-top "20pt"}}
@@ -171,12 +168,7 @@
            (when-let [code (:code data)]
              (om/build source-snippet data {:opts "filter"})
              )
-           #_(when (:custom data)
-               [:svg {:version "1.1" :width 600 :height 600}
-                [:text {:x 200 :y 100} "(>! (chan))"]
-                [:rect {:x 0 :y 0 :width 200 :height 200 :style {:fill "blue"}}]
-                [:rect {:x 50 :y 20 :width 100 :height 300 :style {:fill "red"}}]]
-               )]
+           ]
           ])))))
 
 (defn set-slide-class! [app n max clz]
