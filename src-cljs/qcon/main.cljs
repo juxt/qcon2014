@@ -111,6 +111,8 @@
 
           {:title "Quick tutorial"}
 
+          {:subtitle "channels (TODO)"}
+
           {:subtitle "put and take"
            :custom (PutAndTakeSlide. {:buffer-size 7 :font-size "72pt" :radius 50})}
 
