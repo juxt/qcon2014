@@ -13,10 +13,6 @@
 
 (def debug false)
 
-(def bufsize 7)
-(def buf1 (buffer bufsize))
-(def chan1 (chan buf1))
-
 (def default-font "72pt")
 
 (defprotocol Slide
@@ -25,36 +21,46 @@
 
 (defrecord PutAndTakeSlide []
   Slide
-  (init-slide-state [_] nil)
+  (init-slide-state [_]
+    (println "Init state of PutAndTakeSlide")
+    (let [bufsize 7
+          buf1 (buffer bufsize)
+          chan1 (chan buf1)]
+      {:bufsize bufsize
+       :buf1 buf1
+       :chan1 chan1}))
   (render-slide [_ data owner]
-    [:div
-     [:svg {:version "1.1" :width 800 :height 600}
+    (let [bufsize (om/get-state owner :bufsize)
+          buf1 (om/get-state owner :buf1)
+          chan1 (om/get-state owner :chan1)]
+      [:div
+       [:svg {:version "1.1" :width 800 :height 600}
 
-      [:g {:transform "translate(70,65)"
-           :onClick (fn [_]
-                      (go
-                        (>! chan1 (str (rand-int 10)))
-                        (om/set-state! owner :modified (new js/Date))))}
+        [:g {:transform "translate(70,65)"
+             :onClick (fn [_]
+                        (go
+                          (>! chan1 (str (rand-int 10)))
+                          (om/set-state! owner :modified (new js/Date))))}
 
-       [:rect {:x 0 :y 0 :width 140 :height 100 :fill "black"}]
-       [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} ">!"]]
+         [:rect {:x 0 :y 0 :width 140 :height 100 :fill "black"}]
+         [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} ">!"]]
 
-      (for [x (range bufsize)]
-        (let [radius 50]
-          [:g {:transform (str "translate(320,320)")}
-           [:g {:transform (str "rotate(" (- (* (- x (/ bufsize 2) (- 1)) (/ 180 bufsize))) ") translate(200)")}
-            [:circle {:cx 0 :cy radius :r radius :style {:fill "#224"}}]
-            [:text {:x (- 0 (/ radius 2) 5) :y (* 1.7 radius) :style {:font-size default-font :fill "white"}}
-             (str (aget (.-arr (.-buf buf1)) (mod (+ x (.-head (.-buf buf1))) bufsize)))]]]))
+        (for [x (range bufsize)]
+          (let [radius 50]
+            [:g {:transform (str "translate(320,320)")}
+             [:g {:transform (str "rotate(" (- (* (- x (/ bufsize 2) (- 1)) (/ 180 bufsize))) ") translate(200)")}
+              [:circle {:cx 0 :cy radius :r radius :style {:fill "#224"}}]
+              [:text {:x (- 0 (/ radius 2) 5) :y (* 1.7 radius) :style {:font-size default-font :fill "white"}}
+               (str (aget (.-arr (.-buf buf1)) (mod (+ x (.-head (.-buf buf1))) bufsize)))]]]))
 
-      [:g {:transform "translate(70,475)"
-           :onClick (fn [_]
-                      (go
-                        (<! chan1)
-                        (om/set-state! owner :modified (new js/Date))))}
-       [:rect {
-               :x 0 :y 0 :width 140 :height 100 :fill "black"}]
-       [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} "<!"]]]]))
+        [:g {:transform "translate(70,475)"
+             :onClick (fn [_]
+                        (go
+                          (<! chan1)
+                          (om/set-state! owner :modified (new js/Date))))}
+         [:rect {
+                 :x 0 :y 0 :width 140 :height 100 :fill "black"}]
+         [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} "<!"]]]])))
 
 (def app-model
   (atom {:current-slide 3
@@ -112,6 +118,10 @@
 
 (defn slide [data owner current]
   (reify
+    om/IInitState
+    (init-state [_]
+      (when-let [custom (:custom data)]
+        (init-slide-state (om/value custom))))
     om/IRender
     (render [_]
       (html
