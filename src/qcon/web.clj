@@ -7,6 +7,7 @@
    [hiccup.core :refer (html h)]
    [jig.util :refer (satisfying-dependency)]
    [liberator.core :refer (defresource)]
+   qcon.examples
    jig)
   (:import
    (jig Lifecycle)
@@ -48,13 +49,12 @@
 (defresource source-resource []
   :available-media-types #{"text/html" "text/plain"}
   :handle-ok (fn [{{mtype :media-type} :representation}]
-               (let [text (source-fn #'source-fn)]
+               (let [text (source-fn #'qcon.examples/example-1)]
                  (case mtype
                    "text/plain"
                    text
                    "text/html"
                    (html [:pre text])))))
-
 
 (defn make-handlers [loader plan]
   (let [p (promise)]

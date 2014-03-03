@@ -56,7 +56,7 @@
 
 
 (def app-model
-  (atom {:current-slide 3
+  (atom {:current-slide 4
          :slides
          [{:title "core.async"
            :event "QCon 2014"
@@ -76,7 +76,7 @@
 
           {:title "Quick tutorial"}
 
-          {:title "put and take"
+          {:subtitle "put and take"
            :builder fig-put-and-take}
 
           {:title "Buffers"
@@ -97,12 +97,18 @@
     om/IRender
     (render [_]
       (html
-       [:pre ;; {:class "brush: clojure" :style {:width "95%"}}
-        (om/get-state owner :text)]))
-    #_om/IDidUpdate
-    #_(did-update [this prev-props prev-state]
-      (.setAttribute (-.class (om/get-node owner))  "brush: clojure")
-      #_(goog.dom.classes.add (om/get-node owner) "brush: clojure"))))
+       [:div]))
+    om/IDidUpdate
+    (did-update [this prev-props prev-state]
+      ;; Attempt at syntax highlighting
+      #_(println (sh.Highlighter.getHtml (om/get-state owner :text)))
+      (let [n (om/get-node owner)]
+        (while (.hasChildNodes n)
+          (.removeChild n (.-lastChild n))))
+      (let [pre (.createElement js/document "pre")]
+        (.setAttribute pre "class" "brush: clojure")
+        (.appendChild pre (.createTextNode js/document (om/get-state owner :text)))
+        (.appendChild (om/get-node owner) pre)))))
 
 (defn slide [data owner current]
   (reify
