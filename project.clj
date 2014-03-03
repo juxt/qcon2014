@@ -23,6 +23,8 @@
                  [sablono "0.2.6"]
                  [ankha "0.1.1"]
                  [cljs-ajax "0.2.3"]
+                 [liberator "0.11.0"]
+                 [hiccup "1.0.5"]
                  ]
 
   :source-paths ["src" "src-cljs"]
