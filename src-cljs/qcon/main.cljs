@@ -1,4 +1,8 @@
 ;; Copyright © 2013, JUXT LTD. All Rights Reserved.
+
+;; This is a slide presentation using ClojureScript and Om. Please feel
+;; free to make use of this code for your own presentations.
+
 (ns qcon.main
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require
