@@ -1,3 +1,4 @@
+;; Copyright © 2013, JUXT LTD. All Rights Reserved.
 (ns qcon.main
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require

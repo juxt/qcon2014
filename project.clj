@@ -1,3 +1,4 @@
+;; Copyright © 2013, JUXT LTD. All Rights Reserved.
 (def jig-version "2.0.2-SNAPSHOT")
 
 (defproject qcon "0.1.0-SNAPSHOT"
