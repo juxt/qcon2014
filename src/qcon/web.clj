@@ -48,11 +48,12 @@
 (defresource source-resource []
   :available-media-types #{"text/html" "text/plain"}
   :handle-ok (fn [{{mtype :media-type} :representation}]
-               (case mtype
-                 "text/plain"
-                 (source-fn #'filter)
-                 "text/html"
-                 (html [:pre (source-fn #'filter)]))))
+               (let [text (source-fn #'source-fn)]
+                 (case mtype
+                   "text/plain"
+                   text
+                   "text/html"
+                   (html [:pre text])))))
 
 
 (defn make-handlers [loader plan]
@@ -67,6 +68,7 @@
     ["" (->Redirect 307 (:index handlers))]
     ["source" (:source-resource handlers)]
     ["deck.js/" (->Files {:dir (:deckjs.dir config)})]
+    ["sh/" (->Resources {:prefix "sh/"})]
     ["static/" (->Resources {:prefix ""})]
     ]])
 
