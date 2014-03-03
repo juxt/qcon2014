@@ -23,7 +23,6 @@
 (defrecord PutAndTakeSlide [opts]
   Slide
   (init-slide-state [_]
-    (println "Init state of PutAndTakeSlide")
     (let [bufsize (:buffer-size opts)
           buf1 (buffer bufsize)
           chan1 (chan buf1)]
