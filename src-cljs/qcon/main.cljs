@@ -23,42 +23,42 @@
 (defrecord PutAndTakeSlide [opts]
   Slide
   (init-slide-state [_]
-    (let [bufsize (:buffer-size opts)
-          buf1 (buffer bufsize)
-          chan1 (chan buf1)]
-      {:bufsize bufsize
-       :buf1 buf1
-       :chan1 chan1
-       :default-font (:font-size opts)}))
+    (let [buf (buffer (:buffer-size opts))
+          ch (chan buf)]
+      {:buffer-size (:buffer-size opts)
+       :buf buf
+       :ch ch
+       :default-font (:font-size opts)
+       :radius (:radius opts)}))
   (render-slide [_ data owner]
-    (let [bufsize (om/get-state owner :bufsize)
-          buf1 (om/get-state owner :buf1)
-          chan1 (om/get-state owner :chan1)
-          default-font (om/get-state owner :default-font)]
+    (let [bufsize (om/get-state owner :buffer-size)
+          buf (om/get-state owner :buf)
+          ch (om/get-state owner :ch)
+          default-font (om/get-state owner :default-font)
+          radius (om/get-state owner :radius)]
       [:div
        [:svg {:version "1.1" :width 800 :height 600}
-
         [:g {:transform "translate(70,65)"
              :onClick (fn [_]
                         (go
-                          (>! chan1 (str (rand-int 10)))
+                          (>! ch (str (rand-int 10)))
+                          ;; Forces a re-render
                           (om/set-state! owner :modified (new js/Date))))}
 
          [:rect {:x 0 :y 0 :width 140 :height 100 :fill "black"}]
          [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} ">!"]]
 
         (for [x (range bufsize)]
-          (let [radius 50]
-            [:g {:transform (str "translate(320,320)")}
-             [:g {:transform (str "rotate(" (- (* (- x (/ bufsize 2) (- 1)) (/ 180 bufsize))) ") translate(200)")}
-              [:circle {:cx 0 :cy radius :r radius :style {:fill "#224"}}]
-              [:text {:x (- 0 (/ radius 2) 5) :y (* 1.7 radius) :style {:font-size default-font :fill "white"}}
-               (str (aget (.-arr (.-buf buf1)) (mod (+ x (.-head (.-buf buf1))) bufsize)))]]]))
+          [:g {:transform (str "translate(320,320)")}
+           [:g {:transform (str "rotate(" (- (* (- x (/ bufsize 2) (- 1)) (/ 180 bufsize))) ") translate(200)")}
+            [:circle {:cx 0 :cy radius :r radius :style {:fill "#224"}}]
+            [:text {:x (- 0 (/ radius 2) 5) :y (* 1.7 radius) :style {:font-size default-font :fill "white"}}
+             (str (aget (.-arr (.-buf buf)) (mod (+ x (.-head (.-buf buf))) bufsize)))]]])
 
         [:g {:transform "translate(70,475)"
              :onClick (fn [_]
                         (go
-                          (<! chan1)
+                          (<! ch)
                           (om/set-state! owner :modified (new js/Date))))}
          [:rect {
                  :x 0 :y 0 :width 140 :height 100 :fill "black"}]
@@ -86,7 +86,7 @@
           {:title "Quick tutorial"}
 
           {:subtitle "put and take"
-           :custom (PutAndTakeSlide. {:buffer-size 7 :font-size "72pt"})}
+           :custom (PutAndTakeSlide. {:buffer-size 7 :font-size "72pt" :radius 50})}
 
           {:title "Buffers"
            :code "(<! (chan))"}
