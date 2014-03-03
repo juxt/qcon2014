@@ -20,17 +20,17 @@
   (init-slide-state [_])
   (render-slide [_ data owner]))
 
-(defrecord PutAndTakeSlide []
+(defrecord PutAndTakeSlide [opts]
   Slide
   (init-slide-state [_]
     (println "Init state of PutAndTakeSlide")
-    (let [bufsize 7
+    (let [bufsize (:buffer-size opts)
           buf1 (buffer bufsize)
           chan1 (chan buf1)]
       {:bufsize bufsize
        :buf1 buf1
        :chan1 chan1
-       :default-font "72pt"}))
+       :default-font (:font-size opts)}))
   (render-slide [_ data owner]
     (let [bufsize (om/get-state owner :bufsize)
           buf1 (om/get-state owner :buf1)
@@ -87,7 +87,7 @@
           {:title "Quick tutorial"}
 
           {:subtitle "put and take"
-           :custom (PutAndTakeSlide.)}
+           :custom (PutAndTakeSlide. {:buffer-size 7 :font-size "72pt"})}
 
           {:title "Buffers"
            :code "(<! (chan))"}
