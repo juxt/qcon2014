@@ -17,46 +17,50 @@
   [:p "hello, i've been built by a builder"])
 
 (def bufsize 7)
-
 (def buf1 (buffer bufsize))
 (def chan1 (chan buf1))
 
 (def default-font "72pt")
 
-(defn fig-put-and-take [data owner]
-  [:div
-   [:svg {:version "1.1" :width 800 :height 600}
+(defprotocol Slide
+  (init-slide-state [_])
+  (render-slide [_ data owner]))
 
-    [:g {:transform "translate(70,65)"
-         :onClick (fn [_]
-                        (go
-                          (>! chan1 (str (rand-int 10)))
-                          (om/set-state! owner :modified (new js/Date))
-                          (.dir js/console buf1)))}
+(defrecord PutAndTakeSlide []
+  Slide
+  (init-slide-state [_] nil)
+  (render-slide [_ data owner]
+    [:div
+     [:svg {:version "1.1" :width 800 :height 600}
 
-     [:rect {:x 0 :y 0 :width 140 :height 100 :fill "black"}]
-     [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} ">!"]]
+      [:g {:transform "translate(70,65)"
+           :onClick (fn [_]
+                      (go
+                        (>! chan1 (str (rand-int 10)))
+                        (om/set-state! owner :modified (new js/Date))))}
 
-    (for [x (range bufsize)]
-      (let [radius 50]
-        [:g {:transform (str "translate(320,320)")}
-         [:g {:transform (str "rotate(" (- (* (- x (/ bufsize 2) (- 1)) (/ 180 bufsize))) ") translate(200)")}
-          [:circle {:cx 0 :cy radius :r radius :style {:fill "#224"}}]
-          [:text {:x (- 0 (/ radius 2) 5) :y (* 1.7 radius) :style {:font-size default-font :fill "white"}}
-           (str (aget (.-arr (.-buf buf1)) (mod (+ x (.-head (.-buf buf1))) bufsize)))]]]))
+       [:rect {:x 0 :y 0 :width 140 :height 100 :fill "black"}]
+       [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} ">!"]]
 
-    [:g {:transform "translate(70,475)"
-         :onClick (fn [_]
-                        (go
-                          (<! chan1)
-                          (om/set-state! owner :modified (new js/Date))))}
-     [:rect {
-             :x 0 :y 0 :width 140 :height 100 :fill "black"}]
-     [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} "<!"]]]])
+      (for [x (range bufsize)]
+        (let [radius 50]
+          [:g {:transform (str "translate(320,320)")}
+           [:g {:transform (str "rotate(" (- (* (- x (/ bufsize 2) (- 1)) (/ 180 bufsize))) ") translate(200)")}
+            [:circle {:cx 0 :cy radius :r radius :style {:fill "#224"}}]
+            [:text {:x (- 0 (/ radius 2) 5) :y (* 1.7 radius) :style {:font-size default-font :fill "white"}}
+             (str (aget (.-arr (.-buf buf1)) (mod (+ x (.-head (.-buf buf1))) bufsize)))]]]))
 
+      [:g {:transform "translate(70,475)"
+           :onClick (fn [_]
+                      (go
+                        (<! chan1)
+                        (om/set-state! owner :modified (new js/Date))))}
+       [:rect {
+               :x 0 :y 0 :width 140 :height 100 :fill "black"}]
+       [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} "<!"]]]]))
 
 (def app-model
-  (atom {:current-slide 4
+  (atom {:current-slide 3
          :slides
          [{:title "core.async"
            :event "QCon 2014"
@@ -77,7 +81,7 @@
           {:title "Quick tutorial"}
 
           {:subtitle "put and take"
-           :builder fig-put-and-take}
+           :builder (PutAndTakeSlide.)}
 
           {:title "Buffers"
            :code "(<! (chan))"}
@@ -90,7 +94,6 @@
     (will-mount [_]
       (GET "/source"
           (-> {:handler (fn [e]
-                          (println "Returned " e)
                           (om/set-state! owner :text e))
                :headers {"Accept" "text/plain"}
                :response-format :raw})))
@@ -141,8 +144,8 @@
              )
 
            (when-let [builder (:builder data)]
-             (builder data owner)
-             )
+             (when (satisfies? Slide (om/value builder))
+               (render-slide (om/value builder) data owner)))
 
            (when-let [event (:event data)]
              [:div {:style {:text-align "center" :margin-top "20pt"}}
