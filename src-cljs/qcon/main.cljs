@@ -13,8 +13,6 @@
 
 (def debug false)
 
-(def default-font "72pt")
-
 (defprotocol Slide
   (init-slide-state [_])
   (render-slide [_ data owner]))
@@ -28,11 +26,13 @@
           chan1 (chan buf1)]
       {:bufsize bufsize
        :buf1 buf1
-       :chan1 chan1}))
+       :chan1 chan1
+       :default-font "72pt"}))
   (render-slide [_ data owner]
     (let [bufsize (om/get-state owner :bufsize)
           buf1 (om/get-state owner :buf1)
-          chan1 (om/get-state owner :chan1)]
+          chan1 (om/get-state owner :chan1)
+          default-font (om/get-state owner :default-font)]
       [:div
        [:svg {:version "1.1" :width 800 :height 600}
 
