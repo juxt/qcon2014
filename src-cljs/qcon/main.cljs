@@ -109,17 +109,48 @@
          [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}}
           "(alts! ch (time-out 2000))"]]]])))
 
+(defn create-circle [offset angle]
+  (fn [app owner]
+    (reify
+      om/IInitState
+      (init-state [_]
+        (println "initializing circle state yay!!")
+        )
+      om/IWillMount
+      (will-mount [_]
+        (go-loop []
+          (<! (timeout 1000))
+          (println "I'am looping")
+          (recur)
+          )
+        )
+      om/IRender
+      (render [_]
+        (html
+         [:circle {:cx (+ 300 (* offset (Math/cos angle))) :cy (- 300 (* offset (Math/sin angle))) :r 30 :fill "#5F8"}])))
+    ))
+
 (defrecord GoBlockSlide [opts]
   Slide
   (init-slide-state [_]
-    {:default-font (:font-size opts)})
+    {:default-font (:font-size opts)
+     :circles (for [n (range 5)]
+                (let [angle (* n (/ (* 2 Math/PI) 5))
+                      offset 250]
+                  (create-circle offset angle)))})
+
   (render-slide [_ data owner]
     (let [default-font (om/get-state owner :default-font)]
       [:div
        [:svg {:version "1.1" :width 600 :height 600}
-        [:g {:transform "translate(70,150)"}
-         [:rect {:x 0 :y 0 :width 600 :height 600 :fill "red"}]
-         ]]])))
+
+        [:g
+         [:rect {:x 0 :y 0 :width 600 :height 600 :fill "#222"}]
+         (for [c (om/get-state owner :circles)]
+           (om/build c data))
+         [:text {:x 20 :y 20 :fill "#fdf"} (str "sin:" (Math/sin (/ Math/PI 6)))]
+         ]
+        ]])))
 
 (def app-model
   (atom {:current-slide 8
