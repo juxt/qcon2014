@@ -71,13 +71,11 @@
 (defrecord TimeoutSlide [opts]
   Slide
   (init-slide-state [_]
-    {:status "READY"})
+    {:default-font (:font-size opts)
+     :status "READY"})
 
   (render-slide [_ data owner]
-    (let [bufsize (om/get-state owner :buffer-size)
-          buf (om/get-state owner :buf)
-          default-font (om/get-state owner :default-font)
-          radius (om/get-state owner :radius)]
+    (let [default-font (om/get-state owner :default-font)]
       [:div
        [:svg {:version "1.1" :width 800 :height 600}
         [:text {:x 30 :y 120 :style {:font-size default-font :stroke "white" :fill "white"}} (om/get-state owner :status)]
@@ -90,8 +88,41 @@
          [:rect {:x 0 :y 0 :width 280 :height 100 :fill "red"}]
          [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} "(timeout 2000)"]]]])))
 
+
+(defrecord AltsSlide [opts]
+  Slide
+  (init-slide-state [_]
+    {:default-font (:font-size opts)
+     :status "READY"})
+  (render-slide [_ data owner]
+    (let [default-font (om/get-state owner :default-font)]
+      [:div
+       [:svg {:version "1.1" :width 800 :height 600}
+        [:text {:x 30 :y 120 :style {:font-size default-font :stroke "white" :fill "white"}} (om/get-state owner :status)]
+        [:g {:transform "translate(70,150)"
+             :onClick (fn [_]
+                        (om/set-state! owner :status "WAITING")
+                        (go
+                          (<! (timeout 2000))
+                          (om/set-state! owner :status "CLOSED")))}
+         [:rect {:x 0 :y 0 :width 280 :height 100 :fill "red"}]
+         [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}}
+          "(alts! ch (time-out 2000))"]]]])))
+
+(defrecord GoBlockSlide [opts]
+  Slide
+  (init-slide-state [_]
+    {:default-font (:font-size opts)})
+  (render-slide [_ data owner]
+    (let [default-font (om/get-state owner :default-font)]
+      [:div
+       [:svg {:version "1.1" :width 600 :height 600}
+        [:g {:transform "translate(70,150)"}
+         [:rect {:x 0 :y 0 :width 600 :height 600 :fill "red"}]
+         ]]])))
+
 (def app-model
-  (atom {:current-slide 4
+  (atom {:current-slide 8
          :slides
          [{:title "core.async"
            :event "QCon 2014"
@@ -117,10 +148,19 @@
            :custom (PutAndTakeSlide. {:buffer-size 7 :font-size "72pt" :radius 50})}
 
           {:subtitle "timeouts"
-           :custom (TimeoutSlide. {:buffer-size 5 :font-size "72pt" :radius 70})}
+           :custom (TimeoutSlide. {:font-size "72pt"})}
 
-          {:title "Buffers"
+          {:subtitle "buffers (TODO)"
            :code "(<! (chan))"}
+
+          {:subtitle "alts!"
+           :custom (AltsSlide. {:font-size "30pt"})}
+
+          {:subtitle "go blocks"
+           :custom (GoBlockSlide. {:font-size "30pt"})}
+          ;; Show result of race in alts! between a channel and a timeout
+
+          ;; Go blocks
 
           {:title "When?"}]}))
 
