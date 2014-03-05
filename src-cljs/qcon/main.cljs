@@ -325,7 +325,7 @@
 
             ;; TODO Don't forget to mention Hecuba and Stentor (that they're free software)
 
-            {:title "END?"}]))}))
+            {:title "END"}]))}))
 
 (defn source-snippet [data owner fname]
   (reify
