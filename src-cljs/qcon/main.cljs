@@ -23,49 +23,52 @@
   (init-slide-state [_])
   (render-slide [_ data owner]))
 
-(defrecord PutAndTakeSlide [opts]
-  Slide
-  (init-slide-state [_]
-    (let [buf (buffer (:buffer-size opts))
-          ch (chan buf)]
-      {:buffer-size (:buffer-size opts)
-       :buf buf
-       :ch ch
-       :default-font (:font-size opts)
-       :radius (:radius opts)}))
-  (render-slide [_ data owner]
-    (let [bufsize (om/get-state owner :buffer-size)
-          buf (om/get-state owner :buf)
-          ch (om/get-state owner :ch)
-          default-font (om/get-state owner :default-font)
-          radius (om/get-state owner :radius)]
-      [:div
-       [:svg {:version "1.1" :width 800 :height 600}
-        [:g {:transform "translate(70,65)"
-             :onClick (fn [_]
-                        (go
-                          (>! ch (str (rand-int 10)))
-                          ;; Forces a re-render
-                          (om/set-state! owner :modified (new js/Date))))}
+(defn put-and-take-slide [data owner opts]
+  (reify
+    om/IInitState
+    (init-state [_]
+      (let [buf (buffer (:buffer-size opts))
+            ch (chan buf)]
+        {:buffer-size (:buffer-size opts)
+         :buf buf
+         :ch ch
+         :default-font (:font-size opts)
+         :radius (:radius opts)}))
+    om/IRender
+    (render [_]
+      (let [bufsize (om/get-state owner :buffer-size)
+            buf (om/get-state owner :buf)
+            ch (om/get-state owner :ch)
+            default-font (om/get-state owner :default-font)
+            radius (om/get-state owner :radius)]
+        (html
+         [:div
+          [:svg {:version "1.1" :width 800 :height 600}
+           [:g {:transform "translate(70,65)"
+                :onClick (fn [_]
+                           (go
+                             (>! ch (str (rand-int 10)))
+                             ;; Forces a re-render
+                             (om/set-state! owner :modified (new js/Date))))}
 
-         [:rect {:x 0 :y 0 :width 140 :height 100 :fill "black"}]
-         [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} ">!"]]
+            [:rect {:x 0 :y 0 :width 140 :height 100 :fill "black"}]
+            [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} ">!"]]
 
-        (for [x (range bufsize)]
-          [:g {:transform (str "translate(320,320)")}
-           [:g {:transform (str "rotate(" (- (* (- x (/ bufsize 2) (- 1)) (/ 180 bufsize))) ") translate(200)")}
-            [:circle {:cx 0 :cy radius :r radius :style {:fill "#224"}}]
-            [:text {:x (- 0 (/ radius 2) 5) :y (* 1.7 radius) :style {:font-size default-font :fill "white"}}
-             (str (aget (.-arr (.-buf buf)) (mod (+ x (.-head (.-buf buf))) bufsize)))]]])
+           (for [x (range bufsize)]
+             [:g {:transform (str "translate(320,320)")}
+              [:g {:transform (str "rotate(" (- (* (- x (/ bufsize 2) (- 1)) (/ 180 bufsize))) ") translate(200)")}
+               [:circle {:cx 0 :cy radius :r radius :style {:fill "#224"}}]
+               [:text {:x (- 0 (/ radius 2) 5) :y (* 1.7 radius) :style {:font-size default-font :fill "white"}}
+                (str (aget (.-arr (.-buf buf)) (mod (+ x (.-head (.-buf buf))) bufsize)))]]])
 
-        [:g {:transform "translate(70,475)"
-             :onClick (fn [_]
-                        (go
-                          (<! ch)
-                          (om/set-state! owner :modified (new js/Date))))}
-         [:rect {
-                 :x 0 :y 0 :width 140 :height 100 :fill "black"}]
-         [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} "<!"]]]])))
+           [:g {:transform "translate(70,475)"
+                :onClick (fn [_]
+                           (go
+                             (<! ch)
+                             (om/set-state! owner :modified (new js/Date))))}
+            [:rect {
+                    :x 0 :y 0 :width 140 :height 100 :fill "black"}]
+            [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} "<!"]]]])))))
 
 (defrecord TimeoutSlide [opts]
   Slide
@@ -161,7 +164,7 @@
                "Hello Ruben, buon compleano!!!"]]]])))))
 
 (def app-model
-  (atom {:current-slide 8
+  (atom {:current-slide 1
          :slides
          ;; TODO Add cardinal such that each slide has its own number to avoid react warning
          [{:title "core.async"
@@ -184,8 +187,10 @@
 
           {:subtitle "channels (TODO)"}
 
-          #_{:subtitle "put and take"
-           :custom (PutAndTakeSlide. {:buffer-size 7 :font-size "72pt" :radius 50})}
+          ;; TODO Add source code on right hand side of slide
+          {:subtitle "put and take"
+           :custom put-and-take-slide
+           :opts {:buffer-size 7 :font-size "72pt" :radius 50}}
 
           #_{:subtitle "timeouts"
            :custom (TimeoutSlide. {:font-size "72pt"})}
