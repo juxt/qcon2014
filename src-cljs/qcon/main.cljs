@@ -172,8 +172,7 @@
       (let [from-pos position
             to-pos (:position (get instances to))
             xdelta (/ (- (first to-pos) (first from-pos)) 18)
-            ydelta (/ (- (second to-pos) (second from-pos)) 18)
-            ]
+            ydelta (/ (- (second to-pos) (second from-pos)) 18)]
 
         (go-loop [i 0]
           (<! (timeout 1))
@@ -243,6 +242,7 @@
              [:circle {:cx x :cy y :r 10 :fill "yellow" }])
 
            ]]]]))))
+
 (def app-model
   (atom {:current-slide 9
          :slides
@@ -312,7 +312,8 @@
 
             ;; TODO Don't forget to mention Hecuba and Stentor (that they're free software)
 
-            {:title "END"}]))}))
+            {:title "Thank you"
+             :text "Please evaluate my talk via the mobile app!"}]))}))
 
 (defn source-snippet [data owner fname]
   (reify
@@ -366,11 +367,14 @@
                       :height "100%"}})
 
            (when-let [title (:title data)]
-             [:h1 title]
+             [:div
+              [:h1 title]
+              [:h2 (:text data)]]
              )
 
            (when-let [subtitle (:subtitle data)]
              [:h2 subtitle]
+
              )
 
            (when-let [custom (:custom data)]
