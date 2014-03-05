@@ -341,8 +341,6 @@
       (goog.events.listen
        js/document "keydown"
        (fn [e]
-         (println (.-keyCode e))
-
          (cond
           (= (.-keyCode e) 49)
           (do
