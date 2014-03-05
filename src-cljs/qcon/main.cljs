@@ -275,7 +275,7 @@
            ]]]]))))
 
 (def app-model
-  (atom {:current-slide 4
+  (atom {:current-slide 6
          :slides
          ;; TODO Add cardinal such that each slide has its own number to avoid react warning
          (vec

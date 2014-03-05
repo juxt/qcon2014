@@ -69,7 +69,7 @@
     ["" (->Redirect 307 (:index handlers))]
     ["source" (:source-resource handlers)]
     ["deck.js/" (->Files {:dir (:deckjs.dir config)})]
-    ["sh/" (->Resources {:prefix "sh/"})]
+    ["sh/" (->Files {:dir (:sh.dir config)})]
     ["static/" (->Resources {:prefix ""})]
     ]])
 
