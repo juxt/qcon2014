@@ -436,19 +436,25 @@
        js/document "keydown"
        (fn [e]
          (cond
-          (= (.-keyCode e) 49)
-          (do
-            (println "I am going to the beginning of the presentation!")
-            (om/update! app :current-slide 0))
+
+          ;; Hit 0, for beginning
+          (= (.-keyCode e) 188)
+          (om/update! app :current-slide 0)
+
+          (= (.-keyCode e) 190)
+          (om/update! app :current-slide (dec (count (:slides @app))))
 
           (or (= (.-keyCode e) 37)
               (= (.-keyCode e) kc/PAGE_UP))
           (when (pos? (:current-slide @app))
             (om/transact! app :current-slide dec))
+
           (or (= (.-keyCode e) 39)
               (= (.-keyCode e) kc/PAGE_DOWN))
           (when (get-in @app [:slides (inc (:current-slide @app))])
-            (om/transact! app :current-slide inc)))
+            (om/transact! app :current-slide inc))
+
+          :otherwise (println "Keyword is" (.-keyCode e)))
 
          (navigate-to-slide! app (:current-slide @app) (count (:slides @app)))))
 
