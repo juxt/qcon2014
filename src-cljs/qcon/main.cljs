@@ -387,10 +387,6 @@
 
 (defn slide [data owner current]
   (reify
-    #_om/IInitState
-    #_(init-state [_]
-      (when-let [custom (:custom data)]
-        (init-slide-state (om/value custom))))
     om/IRender
     (render [_]
       (html
