@@ -331,8 +331,6 @@
                     :radius 30 :font-size "20pt"}
              }
 
-            ;; TODO Play catch between go blocks
-
             ;; TODO Show source code from cljs sources on disk - via cljs - use different namespaces
 
             ;; TODO result of race in alts! between a channel and a timeout
@@ -340,6 +338,22 @@
             ;; Go blocks
 
             {:title "When?"}
+
+            {:title "Some free software projects using core.async"}
+
+            {:subtitle "MastodonC Hecuba"
+             :url "https://github.com/mastodonc/kixi.hecuba"
+             :bullets ["Uses core.async to wire together Om components"]}
+
+            ;; Hecuba demo
+
+            {:subtitle "MQTT Broker"
+             :url "https://github.com/OpenSensorsIO/mqtt-broker"
+             :bullets ["Uses Netty"]}
+
+            {:subtitle "Azondi"
+             :url "https://github.com/OpenSensorsIO/azondi"
+             :bullets ["Builds on MQTT Broker"]}
 
             ;; TODO Don't forget to mention Hecuba and Stentor (that they're free software)
 
@@ -406,6 +420,10 @@
            (when-let [subtitle (:subtitle data)]
              [:h2 subtitle]
 
+             )
+
+           (when-let [url (:url data)]
+             [:h3 [:a {:href url} url]]
              )
 
            (when-let [custom (:custom data)]
