@@ -93,26 +93,28 @@
             [:rect {:x 0 :y 0 :width 280 :height 100 :fill "red"}]
             [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} "(timeout 2000)"]]]])))))
 
-
-(defrecord AltsSlide [opts]
-  Slide
-  (init-slide-state [_]
-    {:default-font (:font-size opts)
-     :status "READY"})
-  (render-slide [_ data owner]
-    (let [default-font (om/get-state owner :default-font)]
-      [:div
-       [:svg {:version "1.1" :width 800 :height 600}
-        [:text {:x 30 :y 120 :style {:font-size default-font :stroke "white" :fill "white"}} (om/get-state owner :status)]
-        [:g {:transform "translate(70,150)"
-             :onClick (fn [_]
-                        (om/set-state! owner :status "WAITING")
-                        (go
-                          (<! (timeout 2000))
-                          (om/set-state! owner :status "CLOSED")))}
-         [:rect {:x 0 :y 0 :width 280 :height 100 :fill "red"}]
-         [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}}
-          "(alts! ch (time-out 2000))"]]]])))
+(defn alts-slide [data owner opts]
+  (reify
+    om/IInitState
+    (init-state [_]
+      {:default-font (:font-size opts)
+       :status "READY"})
+    om/IRender
+    (render [_]
+      (let [default-font (om/get-state owner :default-font)]
+        (html
+         [:div
+          [:svg {:version "1.1" :width 800 :height 600}
+           [:text {:x 30 :y 120 :style {:font-size default-font :stroke "white" :fill "white"}} (om/get-state owner :status)]
+           [:g {:transform "translate(70,150)"
+                :onClick (fn [_]
+                           (om/set-state! owner :status "WAITING")
+                           (go
+                             (<! (timeout 2000))
+                             (om/set-state! owner :status "CLOSED")))}
+            [:rect {:x 0 :y 0 :width 280 :height 100 :fill "red"}]
+            [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}}
+             "(alts! ch (time-out 2000))"]]]])))))
 
 (defn create-circle [offset angle]
   (fn [app owner]
@@ -202,8 +204,9 @@
           {:subtitle "buffers (TODO)"
            :code "(<! (chan))"}
 
-          #_{:subtitle "alts!"
-           :custom (AltsSlide. {:font-size "30pt"})}
+          {:subtitle "alts!"
+           :custom alts-slide
+           :opts {:font-size "30pt"}}
 
           {:subtitle "go blocks"
            :custom go-block-slide
