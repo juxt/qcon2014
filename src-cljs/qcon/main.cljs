@@ -160,7 +160,7 @@
                                  (recur)
                                  ))}})])]]]]))))
 
-(defn catch-game
+(defn catch-game-player
   [owner {:keys [id slide channel instances position]}]
   (go-loop [n 0]
 
@@ -236,7 +236,7 @@
                    {:opts (merge {:radius (:radius opts)
                                   :font-size (:font-size opts)
                                   :slide owner
-                                  :algo catch-game
+                                  :algo catch-game-player
                                   :instances instances} instance)})])))
 
            (when-let [[x y] (om/get-state owner :message)]
