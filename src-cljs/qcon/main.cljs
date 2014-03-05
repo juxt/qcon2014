@@ -163,6 +163,7 @@
 (def app-model
   (atom {:current-slide 8
          :slides
+         ;; TODO Add cardinal such that each slide has its own number to avoid react warning
          [{:title "core.async"
            :event "QCon 2014"
            :author "Malcolm Sparks"
@@ -199,13 +200,18 @@
            :custom go-block-slide
            :opts {:font-size "80pt" :circles 5}
            }
-          ;; Show result of race in alts! between a channel and a timeout
+
+          ;; TODO Play catch between go blocks
+
+          ;; TODO Show source code from cljs sources on disk - via cljs - use different namespaces
+
+          ;; TODO result of race in alts! between a channel and a timeout
 
           ;; Go blocks
 
           {:title "When?"}
 
-          {:title "Hello Ruben"}
+          ;; TODO Don't forget to mention Hecuba and Stentor (that they're free software)
 
           {:title "END?"}]}))
 
