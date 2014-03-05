@@ -19,7 +19,6 @@
 (def debug false)
 
 ;; A protocol for custom slides
-
 (defprotocol Slide
   (init-slide-state [_])
   (render-slide [_ data owner]))
@@ -137,28 +136,29 @@
             [:text {:x -10 :y 10 :style {:font-size "32pt"}} (str (om/get-state owner :label))]]
 ))))))
 
-(defrecord GoBlockSlide [opts]
-  Slide
-  (init-slide-state [_]
-    (let [circles (:circles opts)]
-      {:default-font (:font-size opts)
-       :circles (for [n (range circles)]
-                  (let [angle (* n (/ (* 2 Math/PI) circles))
-                        offset 250]
-                    (create-circle offset angle)))}))
-
-  (render-slide [_ data owner]
-    (let [default-font (om/get-state owner :default-font)]
-      [:div
-       [:svg {:version "1.1" :width 600 :height 600}
-        [:g
-         [:rect {:x 0 :y 0 :width 600 :height 600 :fill "#292"}]
-         (for [c (om/get-state owner :circles)]
-           (om/build c data))
-
-         #_[:text {:x 20 :y 120 :fill "#f00" :style {:font-size "80pt"}} "Hello Ruben, buon compleano!!!"]
-         ]
-        ]])))
+(defn go-block-slide [data owner opts]
+  (reify
+    om/IInitState
+    (init-state [_]
+      (let [circles (:circles opts)]
+        {:default-font (:font-size opts)
+         :circles (for [n (range circles)]
+                    (let [angle (* n (/ (* 2 Math/PI) circles))
+                          offset 250]
+                      (create-circle offset angle)))}))
+    om/IRender
+    (render [_]
+      (let [default-font (om/get-state owner :default-font)]
+        (html
+         [:div
+          [:svg {:version "1.1" :width 600 :height 600}
+           [:g
+            [:rect {:x 0 :y 0 :width 600 :height 600 :fill "#292"}]
+            (for [c (om/get-state owner :circles)]
+              (om/build c data))
+            #_[:text {:x 20 :y 120 :fill "#f00"
+                      :style {:font-size "80pt"}}
+               "Hello Ruben, buon compleano!!!"]]]])))))
 
 (def app-model
   (atom {:current-slide 8
@@ -183,20 +183,22 @@
 
           {:subtitle "channels (TODO)"}
 
-          {:subtitle "put and take"
+          #_{:subtitle "put and take"
            :custom (PutAndTakeSlide. {:buffer-size 7 :font-size "72pt" :radius 50})}
 
-          {:subtitle "timeouts"
+          #_{:subtitle "timeouts"
            :custom (TimeoutSlide. {:font-size "72pt"})}
 
           {:subtitle "buffers (TODO)"
            :code "(<! (chan))"}
 
-          {:subtitle "alts!"
+          #_{:subtitle "alts!"
            :custom (AltsSlide. {:font-size "30pt"})}
 
           {:subtitle "go blocks"
-           :custom (GoBlockSlide. {:font-size "80pt" :circles 5})}
+           :custom go-block-slide
+           :opts {:font-size "80pt" :circles 5}
+           }
           ;; Show result of race in alts! between a channel and a timeout
 
           ;; Go blocks
@@ -234,15 +236,16 @@
 
 (defn slide [data owner current]
   (reify
-    om/IInitState
-    (init-state [_]
+    #_om/IInitState
+    #_(init-state [_]
       (when-let [custom (:custom data)]
         (init-slide-state (om/value custom))))
     om/IRender
     (render [_]
       (html
        (if-let [bg (:background data)]
-         [:img {:class (str "slide " (:class data)) :src bg
+         [:img {:class (str "slide " (:class data))
+                :src bg
                 :style {:width "100%"
                         :height "100%"}}]
 
@@ -266,7 +269,8 @@
              )
 
            (when-let [custom (:custom data)]
-             (when (satisfies? Slide (om/value custom))
+             (om/build custom data {:opts (:opts data)})
+             #_(when (satisfies? Slide (om/value custom))
                (render-slide (om/value custom) data owner)))
 
            (when-let [event (:event data)]
