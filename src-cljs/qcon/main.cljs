@@ -18,6 +18,19 @@
 
 (def debug false)
 
+(defn new-random-pick [owner]
+  (go-loop [c 4]
+    (om/set-state! owner :pending-put nil)
+    (let [n (inc (mod
+                  (+
+                   (om/get-state owner :pending-put)
+                   (inc (rand-int 9)))
+                  9))]
+      (om/set-state! owner :pending-put n))
+    (when (pos? c)
+      (<! (timeout 30))
+      (recur (dec c)))))
+
 (defn put-and-take-slide [data owner opts]
   (reify
     om/IInitState
@@ -28,7 +41,8 @@
          :buf buf
          :ch ch
          :default-font (:font-size opts)
-         :radius (:radius opts)}))
+         :radius (:radius opts)
+         :pending-put nil}))
     om/IRender
     (render [_]
       (let [bufsize (om/get-state owner :buffer-size)
@@ -39,35 +53,52 @@
         (html
          [:div
           [:svg {:version "1.1" :width 800 :height 600}
-           [:g {:transform "translate(70,65)"
-                :onClick (fn [_]
-                           (go
-                             (>! ch (str (rand-int 10)))
-                             ;; Forces a re-render
-                             (om/set-state! owner :modified (new js/Date))))}
 
-            [:g {:transform "translate(90,0)"}
+           [:g {:transform "translate(100,0)"}
+            [:g {:transform "translate(30,0)"
+                 :onClick (fn [_] (new-random-pick owner))}
+             [:rect
+              {:x 0 :y 65 :width 100 :height 100 :fill "black" :stroke "white" :stroke-width 3}]
+             (when-let [n (om/get-state owner :pending-put)]
+               [:text {:x 20 :y 150 :style {:font-size "64pt"
+                                            :color "white"} :fill "white"} (str n)])
+             ]
+
+            [:g {:transform "translate(160,65)"
+                 :onClick (fn [_]
+                            (when-let [n (om/get-state owner :pending-put)]
+                              (om/set-state! owner :pending-put nil)
+                              (go
+                                (>! ch (str n))
+                                (new-random-pick owner)
+                                ;; Forces a re-render
+                                (om/set-state! owner :modified (new js/Date)))))}
              [:rect {:x 0 :y 0 :width 140 :height 100 :fill "black"}]
-             [:text {:x 0 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} ">!"]]]
+             [:text {:x 0 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} ">!"]]
 
-           (for [x (range bufsize)]
-             [:g {:transform (str "translate(320,320)")}
-              [:g {:transform (str "rotate(" (- (* (- x (/ bufsize 2) (- 1)) (/ 180 bufsize))) ") translate(200)")}
-               [:circle {:cx 0 :cy radius :r radius :style {:fill "#224"}}]
-               [:text {:x (- 0 (/ radius 2) 5) :y (* 1.7 radius) :style {:font-size default-font :fill "white"}}
-                (str (aget (.-arr (.-buf buf)) (mod (+ x (.-head (.-buf buf))) bufsize)))]]])
+            (for [x (range bufsize)]
+              [:g {:transform (str "translate(320,320)")}
+               [:g {:transform (str "rotate(" (- (* (- x (/ bufsize 2) (- 1)) (/ 180 bufsize))) ") translate(200)")}
+                [:circle {:cx 0 :cy radius :r radius :style {:fill "#224"}}]
+                [:text {:x (- 0 (/ radius 2) 5) :y (* 1.7 radius) :style {:font-size default-font :fill "white"}}
+                 (str (aget (.-arr (.-buf buf)) (mod (+ x (.-head (.-buf buf))) bufsize)))]]])
 
-           [:g {:transform "translate(70,475)"
-                :onClick (fn [_]
-                           (go
-                             (<! ch)
-                             (om/set-state! owner :modified (new js/Date))))}
+            [:g {:transform "translate(160,475)"
+                 :onClick (fn [_]
+                            (go
+                              (om/set-state! owner :last-get (<! ch))
+                              (om/set-state! owner :modified (new js/Date))))}
 
-            [:g {:transform "translate(90,0)"}
              [:rect {:x 0 :y 0 :width 140 :height 100 :fill "black"}]
-             [:text {:x 0 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} "<!"]]
+             [:text {:x 0 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} "<!"]
 
-            ]]])))))
+             ]
+            [:g  {:transform "translate(30,475)"}
+             [:rect
+              {:x 0 :y 0 :width 100 :height 100 :fill "black" :stroke "white" :stroke-width 3}]
+             (when-let [n (om/get-state owner :last-get)]
+               [:text {:x 20 :y 80 :style {:font-size "64pt"
+                                            :color "white"} :fill "white"} (str n)])]]]])))))
 
 (defn timeout-slide [data owner opts]
   (reify
@@ -244,7 +275,7 @@
            ]]]]))))
 
 (def app-model
-  (atom {:current-slide 9
+  (atom {:current-slide 4
          :slides
          ;; TODO Add cardinal such that each slide has its own number to avoid react warning
          (vec
@@ -457,7 +488,7 @@
     (render [_]
       (html
        [:div
-        #_[:p (str "Current slide is " (inc (:current-slide app)) "/" (count (:slides app)))]
+        [:p (str "Current slide is " (inc (:current-slide app)) "/" (count (:slides app)))]
         (om/build-all slide
                       (:slides app)
                       {:key :slideno :init-state chans :opts (:current-slide app)})]))))
