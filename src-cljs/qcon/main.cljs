@@ -67,7 +67,7 @@
 
 (defn timeout-slide [data owner opts]
   (reify
-    om/IInitSlide
+    om/IInitState
     (init-state [_]
       {:default-font (:font-size opts)
        :status "READY"})
