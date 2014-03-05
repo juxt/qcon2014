@@ -70,25 +70,28 @@
                     :x 0 :y 0 :width 140 :height 100 :fill "black"}]
             [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} "<!"]]]])))))
 
-(defrecord TimeoutSlide [opts]
-  Slide
-  (init-slide-state [_]
-    {:default-font (:font-size opts)
-     :status "READY"})
+(defn timeout-slide [data owner opts]
+  (reify
+    om/IInitSlide
+    (init-state [_]
+      {:default-font (:font-size opts)
+       :status "READY"})
 
-  (render-slide [_ data owner]
-    (let [default-font (om/get-state owner :default-font)]
-      [:div
-       [:svg {:version "1.1" :width 800 :height 600}
-        [:text {:x 30 :y 120 :style {:font-size default-font :stroke "white" :fill "white"}} (om/get-state owner :status)]
-        [:g {:transform "translate(70,150)"
-             :onClick (fn [_]
-                        (om/set-state! owner :status "WAITING")
-                        (go
-                          (<! (timeout 2000))
-                          (om/set-state! owner :status "CLOSED")))}
-         [:rect {:x 0 :y 0 :width 280 :height 100 :fill "red"}]
-         [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} "(timeout 2000)"]]]])))
+    om/IRender
+    (render [_]
+      (let [default-font (om/get-state owner :default-font)]
+        (html
+         [:div
+          [:svg {:version "1.1" :width 800 :height 600}
+           [:text {:x 30 :y 120 :style {:font-size default-font :stroke "white" :fill "white"}} (om/get-state owner :status)]
+           [:g {:transform "translate(70,150)"
+                :onClick (fn [_]
+                           (om/set-state! owner :status "WAITING")
+                           (go
+                             (<! (timeout 2000))
+                             (om/set-state! owner :status "CLOSED")))}
+            [:rect {:x 0 :y 0 :width 280 :height 100 :fill "red"}]
+            [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} "(timeout 2000)"]]]])))))
 
 
 (defrecord AltsSlide [opts]
@@ -192,8 +195,9 @@
            :custom put-and-take-slide
            :opts {:buffer-size 7 :font-size "72pt" :radius 50}}
 
-          #_{:subtitle "timeouts"
-           :custom (TimeoutSlide. {:font-size "72pt"})}
+          {:subtitle "timeouts"
+           :custom timeout-slide
+           :opts {:font-size "72pt"}}
 
           {:subtitle "buffers (TODO)"
            :code "(<! (chan))"}
