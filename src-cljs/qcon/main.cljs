@@ -115,14 +115,12 @@
             [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}}
              "(alts! ch (time-out 2000))"]]]])))))
 
-(defn go-block [data owner {:keys [radius algo font-size]}]
+(defn go-block [data owner {:keys [radius algo font-size] :as opts}]
   (reify
     om/IInitState
-    (init-state [_]
-      {:label ""})
+    (init-state [_] {:label ""})
     om/IWillMount
-    (will-mount [_]
-      (algo owner))
+    (will-mount [_] (algo owner opts))
     om/IRender
     (render [_]
       (html
@@ -161,6 +159,43 @@
                                  (om/set-state! owner :label (str (rand-int 10)))
                                  (recur)
                                  ))}})])]]]]))))
+
+(defn catch-game
+  [owner {:keys [id slide channel instances position]}]
+  (println "instances is" instances)
+  (go-loop [n 0]
+
+    (om/set-state! owner :label n)
+    (<! channel)
+
+    (println "instances is " (count instances))
+    (let [to (mod (+ id (+ 2 (rand-int (- (count instances) 4))))
+                  (count instances)
+                  )]
+      ;;(println "Instance " id " is playing and sending to" to)
+      ;;(println "From position" position)
+      ;;(println "To position" (:position (get instances to)))
+      (let [from-pos position
+            to-pos (:position (get instances to))
+            xdelta (/ (- (first to-pos) (first from-pos)) 18)
+            ydelta (/ (- (second to-pos) (second from-pos)) 18)
+            ]
+
+        (go-loop [i 0]
+          (<! (timeout 1))
+          ;;(println "show message" x "," y)
+          (om/set-state!
+           slide :message
+           [(+ (first from-pos) (* i xdelta))
+            (+ (second from-pos) (* i ydelta))])
+          (if (= i 18)
+            (do
+              (om/set-state! slide :message nil)
+              (println "to is" to)
+              (>! (get-in instances [to :channel]) "MESSAGE"))
+            (recur (inc i)))
+          )))
+    (recur (inc n))))
 
 (defn catch-game-slide [data owner opts]
   (reify
@@ -207,50 +242,16 @@
 
            ;; Draw the go-blocks
            (let [instances (om/get-state owner :instances)]
-             (for [{:keys [id position channel]} instances]
+             (for [{:keys [id position channel] :as instance} instances]
                (let [[x y] position]
                  [:g {:transform (str "translate(" x "," y ")")}
                   (om/build
                    go-block data
-                   {:opts {:radius (:radius opts)
-                           :font-size (:font-size opts)
-                           ;; Promote this function somewhere
-                           :algo (fn [gb-owner]
-                                   (go-loop [n 0]
-                                     (om/set-state! gb-owner :label n)
-                                     (<! channel)
-
-                                     (let [to (mod (+ id (+ 2 (rand-int (- (count instances) 4))))
-                                                   (count instances)
-                                                   )]
-                                       ;;(println "Instance " id " is playing and sending to" to)
-                                       ;;(println "From position" position)
-                                       ;;(println "To position" (:position (get instances to)))
-                                       (let [from-pos position
-                                             to-pos (:position (get instances to))
-                                             xdelta (/ (- (first to-pos) (first from-pos)) 18)
-                                             ydelta (/ (- (second to-pos) (second from-pos)) 18)
-                                             ]
-
-                                         (go-loop [i 0]
-                                           (<! (timeout 1))
-                                           ;;(println "show message" x "," y)
-                                           (om/set-state!
-                                            owner :message
-                                            [(+ (first from-pos) (* i xdelta))
-                                             (+ (second from-pos) (* i ydelta))])
-                                           (if (= i 18)
-                                             (do
-                                               (om/set-state! owner :message nil)
-                                               (>! (get-in instances [to :channel]) "MESSAGE"))
-                                             (recur (inc i)))
-                                           ))
-                                       )
-
-
-                                     (recur (inc n))
-                                     )
-                                   )}})])))
+                   {:opts (merge {:radius (:radius opts)
+                                  :font-size (:font-size opts)
+                                  :slide owner
+                                  :algo catch-game
+                                  :instances instances} instance)})])))
 
            (when-let [[x y] (om/get-state owner :message)]
              [:circle {:cx x :cy y :r 10 :fill "yellow" }])
