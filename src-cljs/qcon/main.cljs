@@ -46,8 +46,9 @@
                              ;; Forces a re-render
                              (om/set-state! owner :modified (new js/Date))))}
 
-            [:rect {:x 0 :y 0 :width 140 :height 100 :fill "black"}]
-            [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} ">!"]]
+            [:g {:transform "translate(90,0)"}
+             [:rect {:x 0 :y 0 :width 140 :height 100 :fill "black"}]
+             [:text {:x 0 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} ">!"]]]
 
            (for [x (range bufsize)]
              [:g {:transform (str "translate(320,320)")}
@@ -61,9 +62,12 @@
                            (go
                              (<! ch)
                              (om/set-state! owner :modified (new js/Date))))}
-            [:rect {
-                    :x 0 :y 0 :width 140 :height 100 :fill "black"}]
-            [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} "<!"]]]])))))
+
+            [:g {:transform "translate(90,0)"}
+             [:rect {:x 0 :y 0 :width 140 :height 100 :fill "black"}]
+             [:text {:x 0 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} "<!"]]
+
+            ]]])))))
 
 (defn timeout-slide [data owner opts]
   (reify
@@ -111,116 +115,217 @@
             [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}}
              "(alts! ch (time-out 2000))"]]]])))))
 
-(defn create-circle [offset angle]
-  (fn [app owner]
-    (reify
-      om/IInitState
-      (init-state [_]
-        {:label (rand-int 10)}
-        )
-      om/IWillMount
-      (will-mount [_]
-        (go-loop []
-          (<! (timeout (+ 1000 (rand-int 200))))
-          (om/set-state! owner :label (str (rand-int 10)))
-          (recur)
-          )
-        )
-      om/IRender
-      (render [_]
-        (html
-         (let [x (+ 300 (* offset (Math/cos angle)))
-               y (- 300 (* offset (Math/sin angle)))
-               x2 (+ 300 (* (inc offset) (Math/cos angle)))
-               y2 (- 300 (* (inc offset) (Math/sin angle)))
-               ]
-           [:g {:transform (str "translate(" x "," y ")")}
-            [:circle {:cx 0 :cy 0 :r 30 :fill "#5F8"}]
-            [:text {:x -10 :y 10 :style {:font-size "32pt"}} (str (om/get-state owner :label))]]
-))))))
+(defn go-block [data owner {:keys [radius algo font-size]}]
+  (reify
+    om/IInitState
+    (init-state [_]
+      {:label ""})
+    om/IWillMount
+    (will-mount [_]
+      (algo owner))
+    om/IRender
+    (render [_]
+      (html
+       [:g
+        [:rect {:x (- (/ radius 2)) :y (- (/ radius 2)) :width radius :height radius :stroke "white" :stroke-width "2" :fill "#5F8"}]
+        [:text {:x (- 10) :y 20 :style {:font-size font-size}} (str (om/get-state owner :label))]]))))
 
 (defn go-block-slide [data owner opts]
   (reify
     om/IInitState
     (init-state [_]
-      (let [circles (:circles opts)]
-        {:default-font (:font-size opts)
-         :circles (for [n (range circles)]
-                    (let [angle (* n (/ (* 2 Math/PI) circles))
-                          offset 250]
-                      (create-circle offset angle)))}))
+      {:circles
+       (for [n (range (:circles opts))]
+         (let [angle (* n (/ (* 2 Math/PI) (:circles opts)))
+               offset (* .8 (/ (- (min (:width opts) (:height opts)) (:radius opts)) 2))]
+           [(* offset (Math/cos angle))
+            (- (* offset (Math/sin angle)))]))})
     om/IRender
     (render [_]
-      (let [default-font (om/get-state owner :default-font)]
-        (html
-         [:div
-          [:svg {:version "1.1" :width 600 :height 600}
-           [:g
-            [:rect {:x 0 :y 0 :width 600 :height 600 :fill "#292"}]
-            (for [c (om/get-state owner :circles)]
-              (om/build c data))
-            #_[:text {:x 20 :y 120 :fill "#f00"
-                      :style {:font-size "80pt"}}
-               "Hello Ruben, buon compleano!!!"]]]])))))
+      (html
+       [:div
+        [:svg {:version "1.1" :width (:width opts) :height (:height opts)}
+         [:g
+          [:rect {:x 0 :y 0 :width (:width opts) :height (:height opts) :fill "#222"}]
+          ;; Center the diagram
+          [:g {:transform (str "translate(" (/ (:width opts) 2) "," (/ (:height opts) 2) ")")}
+           (for [[x y] (om/get-state owner :circles)]
+             [:g {:transform (str "translate(" x "," y ")")}
+              (om/build
+               go-block data
+               {:opts {:radius (:radius opts)
+                       :font-size (:font-size opts)
+                       :algo (fn [owner]
+                               (go-loop []
+                                 (<! (timeout (+ 1000 (rand-int 200))))
+                                 (om/set-state! owner :label (str (rand-int 10)))
+                                 (recur)
+                                 ))}})])]]]]))))
 
+(defn catch-game-slide [data owner opts]
+  (reify
+    om/IInitState
+    (init-state [_]
+      {:instances
+       (vec
+        (for [n (range (:circles opts))]
+          (let [angle (* n (/ (* 2 Math/PI) (:circles opts)))
+                offset (* .8 (/ (- (min (:width opts) (:height opts)) (:radius opts)) 2))]
+            {:id n
+             :position [(* offset (Math/cos angle))
+                        (- (* offset (Math/sin angle)))]
+             :channel (chan)
+             }
+            )))})
+
+    om/IWillMount
+    (will-mount [_]
+      (println "Mounting game")
+      (go
+        (>! (:channel (first (om/get-state owner :instances)))
+            "MESSAGE"))
+      (let [instances (om/get-state owner :instances)]
+        (println "There are instances:" (count instances))
+        )
+
+      )
+
+    om/IRender
+    (render [_]
+      (html
+       [:div
+        [:svg {:version "1.1" :width (:width opts) :height (:height opts)}
+         [:g
+          [:rect {:x 0 :y 0 :width (:width opts) :height (:height opts) :fill "#222"}]
+          ;; Center the diagram
+          [:g {:transform (str "translate(" (/ (:width opts) 2) "," (/ (:height opts) 2) ")")}
+
+           ;; Draw the paths
+           (for [[x1 y1] (map :position (om/get-state owner :instances))
+                 [x2 y2] (map :position (om/get-state owner :instances))]
+             [:line {:x1 x1 :y1 y1 :x2 x2 :y2 y2 :stroke "#222" :stroke-width 3}])
+
+           ;; Draw the go-blocks
+           (let [instances (om/get-state owner :instances)]
+             (for [{:keys [id position channel]} instances]
+               (let [[x y] position]
+                 [:g {:transform (str "translate(" x "," y ")")}
+                  (om/build
+                   go-block data
+                   {:opts {:radius (:radius opts)
+                           :font-size (:font-size opts)
+                           ;; Promote this function somewhere
+                           :algo (fn [gb-owner]
+                                   (go-loop [n 0]
+                                     (om/set-state! gb-owner :label n)
+                                     (<! channel)
+
+                                     (let [to (mod (+ id (+ 2 (rand-int (- (count instances) 4))))
+                                                   (count instances)
+                                                   )]
+                                       ;;(println "Instance " id " is playing and sending to" to)
+                                       ;;(println "From position" position)
+                                       ;;(println "To position" (:position (get instances to)))
+                                       (let [from-pos position
+                                             to-pos (:position (get instances to))
+                                             xdelta (/ (- (first to-pos) (first from-pos)) 18)
+                                             ydelta (/ (- (second to-pos) (second from-pos)) 18)
+                                             ]
+
+                                         (go-loop [i 0]
+                                           (<! (timeout 1))
+                                           ;;(println "show message" x "," y)
+                                           (om/set-state!
+                                            owner :message
+                                            [(+ (first from-pos) (* i xdelta))
+                                             (+ (second from-pos) (* i ydelta))])
+                                           (if (= i 18)
+                                             (do
+                                               (om/set-state! owner :message nil)
+                                               (>! (get-in instances [to :channel]) "MESSAGE"))
+                                             (recur (inc i)))
+                                           ))
+                                       )
+
+
+                                     (recur (inc n))
+                                     )
+                                   )}})])))
+
+           (when-let [[x y] (om/get-state owner :message)]
+             [:circle {:cx x :cy y :r 10 :fill "yellow" }])
+
+           ]]]]))))
 (def app-model
-  (atom {:current-slide 1
+  (atom {:current-slide 9
          :slides
          ;; TODO Add cardinal such that each slide has its own number to avoid react warning
-         [{:title "core.async"
-           :event "QCon 2014"
-           :author "Malcolm Sparks"
-           :company "JUXT"
-           :email "malcolm@juxt.pro"
-           :twitter "@malcolmsparks"
-           }
+         (vec
+          (map-indexed
+           (fn [i m] (assoc m :slideno (str "slide-" (inc i))))
+           [{:title "core.async"
+             :event "QCon 2014"
+             :author "Malcolm Sparks"
+             :company "JUXT"
+             :email "malcolm@juxt.pro"
+             :twitter "@malcolmsparks"
+             }
 
-          {:subtitle "What is core.async?"
-           ;;:text "Here is the first slide"
-           ;;:background "/static/cspdiag.jpg"
-           :bullets ["Clojure library released May 2013"
-                     "Based on Communicating Sequential Processes"
-                     "Available in Clojure and ClojureScript"]
-           }
+            {:subtitle "What is core.async?"
+             ;;:text "Here is the first slide"
+             ;;:background "/static/cspdiag.jpg"
+             :bullets ["Clojure library released May 2013"
+                       "Based on Communicating Sequential Processes"
+                       "Available in Clojure and ClojureScript"]
+             }
 
-          {:title "Quick tutorial"}
+            {:title "Quick tutorial"}
 
-          {:subtitle "channels (TODO)"}
+            {:subtitle "channels (TODO)"}
 
-          ;; TODO Add source code on right hand side of slide
-          {:subtitle "put and take"
-           :custom put-and-take-slide
-           :opts {:buffer-size 7 :font-size "72pt" :radius 50}}
+            ;; TODO Add source code on right hand side of slide
+            {:subtitle "put and take"
+             :custom put-and-take-slide
+             :opts {:buffer-size 7 :font-size "72pt" :radius 50}}
 
-          {:subtitle "timeouts"
-           :custom timeout-slide
-           :opts {:font-size "72pt"}}
+            {:subtitle "timeouts"
+             :custom timeout-slide
+             :opts {:font-size "72pt"}}
 
-          {:subtitle "buffers (TODO)"
-           :code "(<! (chan))"}
+            {:subtitle "buffers (TODO)"
+             :code "(<! (chan))"}
 
-          {:subtitle "alts!"
-           :custom alts-slide
-           :opts {:font-size "30pt"}}
+            {:subtitle "alts!"
+             :custom alts-slide
+             :opts {:font-size "30pt"}}
 
-          {:subtitle "go blocks"
-           :custom go-block-slide
-           :opts {:font-size "80pt" :circles 5}
-           }
+            {:subtitle "go blocks"
+             :custom go-block-slide
+             :opts {:width 600 :height 600
+                    :circles 7
+                    :radius 60 :font-size "40pt"}
+             }
 
-          ;; TODO Play catch between go blocks
+            {:subtitle "catch game"
+             :custom catch-game-slide
+             :opts {:width 600 :height 600
+                    :circles 13
+                    :radius 30 :font-size "20pt"}
+             }
 
-          ;; TODO Show source code from cljs sources on disk - via cljs - use different namespaces
+            ;; TODO Play catch between go blocks
 
-          ;; TODO result of race in alts! between a channel and a timeout
+            ;; TODO Show source code from cljs sources on disk - via cljs - use different namespaces
 
-          ;; Go blocks
+            ;; TODO result of race in alts! between a channel and a timeout
 
-          {:title "When?"}
+            ;; Go blocks
 
-          ;; TODO Don't forget to mention Hecuba and Stentor (that they're free software)
+            {:title "When?"}
 
-          {:title "END?"}]}))
+            ;; TODO Don't forget to mention Hecuba and Stentor (that they're free software)
+
+            {:title "END?"}]))}))
 
 (defn source-snippet [data owner fname]
   (reify
@@ -358,7 +463,7 @@
         #_[:p (str "Current slide is " (inc (:current-slide app)) "/" (count (:slides app)))]
         (om/build-all slide
                       (:slides app)
-                      {:key :title :init-state chans :opts (:current-slide app)})]))))
+                      {:key :slideno :init-state chans :opts (:current-slide app)})]))))
 
 
 (om/root slides app-model {:target (.getElementById js/document "content")})
