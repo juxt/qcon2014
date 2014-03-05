@@ -162,19 +162,13 @@
 
 (defn catch-game
   [owner {:keys [id slide channel instances position]}]
-  (println "instances is" instances)
   (go-loop [n 0]
 
     (om/set-state! owner :label n)
     (<! channel)
 
-    (println "instances is " (count instances))
     (let [to (mod (+ id (+ 2 (rand-int (- (count instances) 4))))
-                  (count instances)
-                  )]
-      ;;(println "Instance " id " is playing and sending to" to)
-      ;;(println "From position" position)
-      ;;(println "To position" (:position (get instances to)))
+                  (count instances))]
       (let [from-pos position
             to-pos (:position (get instances to))
             xdelta (/ (- (first to-pos) (first from-pos)) 18)
@@ -183,7 +177,6 @@
 
         (go-loop [i 0]
           (<! (timeout 1))
-          ;;(println "show message" x "," y)
           (om/set-state!
            slide :message
            [(+ (first from-pos) (* i xdelta))
@@ -191,7 +184,6 @@
           (if (= i 18)
             (do
               (om/set-state! slide :message nil)
-              (println "to is" to)
               (>! (get-in instances [to :channel]) "MESSAGE"))
             (recur (inc i)))
           )))
@@ -215,15 +207,9 @@
 
     om/IWillMount
     (will-mount [_]
-      (println "Mounting game")
       (go
         (>! (:channel (first (om/get-state owner :instances)))
-            "MESSAGE"))
-      (let [instances (om/get-state owner :instances)]
-        (println "There are instances:" (count instances))
-        )
-
-      )
+            "MESSAGE")))
 
     om/IRender
     (render [_]
