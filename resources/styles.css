@@ -1,3 +1,9 @@
 html { overflow-y: hidden; }
 
-section.slide { padding: 2em; }
+section.slide { padding: 1em; }
+
+section p {
+  margin-top: 100px;
+  font-size: 40pt;
+  text-align: center;
+}

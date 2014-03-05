@@ -337,9 +337,8 @@
 
             ;; Go blocks
 
-            {:title "When?"}
-
-            {:title "Some free software projects using core.async"}
+            {:title "References"
+             :text "Some free software projects using core.async"}
 
             {:subtitle "MastodonC Hecuba"
              :url "https://github.com/mastodonc/kixi.hecuba"
@@ -356,6 +355,8 @@
              :bullets ["Builds on MQTT Broker"]}
 
             ;; TODO Don't forget to mention Hecuba and Stentor (that they're free software)
+            {:title "Q & A"
+             :text "(map answer (take n questions))"}
 
             {:title "Thank you"
              :text "Please evaluate my talk via the mobile app!"}]))}))
@@ -410,7 +411,7 @@
            (when-let [title (:title data)]
              [:div
               [:h1 title]
-              [:h2 (:text data)]]
+              [:p (:text data)]]
              )
 
            (when-let [subtitle (:subtitle data)]
@@ -502,10 +503,12 @@
     (render [_]
       (html
        [:div
-        [:p (str "Current slide is " (inc (:current-slide app)) "/" (count (:slides app)))]
+
         (om/build-all slide
                       (:slides app)
-                      {:key :slideno :init-state chans :opts (:current-slide app)})]))))
+                      {:key :slideno :init-state chans :opts (:current-slide app)})
+
+        [:p {:style {:position "fixed" :right "10px" :bottom "10px"}} (str "Current slide is " (inc (:current-slide app)) "/" (count (:slides app)))]]))))
 
 
 (om/root slides app-model {:target (.getElementById js/document "content")})
