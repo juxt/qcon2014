@@ -114,41 +114,49 @@
     (reify
       om/IInitState
       (init-state [_]
-        (println "initializing circle state yay!!")
+        {:label (rand-int 10)}
         )
       om/IWillMount
       (will-mount [_]
         (go-loop []
-          (<! (timeout 1000))
-          (println "I'am looping")
+          (<! (timeout (+ 1000 (rand-int 200))))
+          (om/set-state! owner :label (str (rand-int 10)))
           (recur)
           )
         )
       om/IRender
       (render [_]
         (html
-         [:circle {:cx (+ 300 (* offset (Math/cos angle))) :cy (- 300 (* offset (Math/sin angle))) :r 30 :fill "#5F8"}])))
-    ))
+         (let [x (+ 300 (* offset (Math/cos angle)))
+               y (- 300 (* offset (Math/sin angle)))
+               x2 (+ 300 (* (inc offset) (Math/cos angle)))
+               y2 (- 300 (* (inc offset) (Math/sin angle)))
+               ]
+           [:g {:transform (str "translate(" x "," y ")")}
+            [:circle {:cx 0 :cy 0 :r 30 :fill "#5F8"}]
+            [:text {:x -10 :y 10 :style {:font-size "32pt"}} (str (om/get-state owner :label))]]
+))))))
 
 (defrecord GoBlockSlide [opts]
   Slide
   (init-slide-state [_]
-    {:default-font (:font-size opts)
-     :circles (for [n (range 5)]
-                (let [angle (* n (/ (* 2 Math/PI) 5))
-                      offset 250]
-                  (create-circle offset angle)))})
+    (let [circles (:circles opts)]
+      {:default-font (:font-size opts)
+       :circles (for [n (range circles)]
+                  (let [angle (* n (/ (* 2 Math/PI) circles))
+                        offset 250]
+                    (create-circle offset angle)))}))
 
   (render-slide [_ data owner]
     (let [default-font (om/get-state owner :default-font)]
       [:div
        [:svg {:version "1.1" :width 600 :height 600}
-
         [:g
-         [:rect {:x 0 :y 0 :width 600 :height 600 :fill "#222"}]
+         [:rect {:x 0 :y 0 :width 600 :height 600 :fill "#292"}]
          (for [c (om/get-state owner :circles)]
            (om/build c data))
-         [:text {:x 20 :y 20 :fill "#fdf"} (str "sin:" (Math/sin (/ Math/PI 6)))]
+
+         #_[:text {:x 20 :y 120 :fill "#f00" :style {:font-size "80pt"}} "Hello Ruben, buon compleano!!!"]
          ]
         ]])))
 
@@ -188,12 +196,16 @@
            :custom (AltsSlide. {:font-size "30pt"})}
 
           {:subtitle "go blocks"
-           :custom (GoBlockSlide. {:font-size "30pt"})}
+           :custom (GoBlockSlide. {:font-size "80pt" :circles 5})}
           ;; Show result of race in alts! between a channel and a timeout
 
           ;; Go blocks
 
-          {:title "When?"}]}))
+          {:title "When?"}
+
+          {:title "Hello Ruben"}
+
+          {:title "END?"}]}))
 
 (defn source-snippet [data owner fname]
   (reify
@@ -233,7 +245,6 @@
          [:img {:class (str "slide " (:class data)) :src bg
                 :style {:width "100%"
                         :height "100%"}}]
-
 
          [:section {:class (str "slide " (:class data))}
           [:div {:class "deck-slide-scaler"}
@@ -308,7 +319,14 @@
       (goog.events.listen
        js/document "keydown"
        (fn [e]
+         (println (.-keyCode e))
+
          (cond
+          (= (.-keyCode e) 49)
+          (do
+            (println "I am going to the beginning of the presentation!")
+            (om/update! app :current-slide 0))
+
           (or (= (.-keyCode e) 37)
               (= (.-keyCode e) kc/PAGE_UP))
           (when (pos? (:current-slide @app))
