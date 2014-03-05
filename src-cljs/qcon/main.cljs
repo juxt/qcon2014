@@ -18,11 +18,6 @@
 
 (def debug false)
 
-;; A protocol for custom slides
-(defprotocol Slide
-  (init-slide-state [_])
-  (render-slide [_ data owner]))
-
 (defn put-and-take-slide [data owner opts]
   (reify
     om/IInitState
@@ -287,9 +282,7 @@
              )
 
            (when-let [custom (:custom data)]
-             (om/build custom data {:opts (:opts data)})
-             #_(when (satisfies? Slide (om/value custom))
-               (render-slide (om/value custom) data owner)))
+             (om/build custom data {:opts (:opts data)}))
 
            (when-let [event (:event data)]
              [:div {:style {:text-align "center" :margin-top "20pt"}}
@@ -308,10 +301,6 @@
                 )]
              )
 
-           #_[:p (:text data)]
-           #_(when-let [content (:content data)]
-             (apply vec content)
-             )
            (when-let [code (:code data)]
              (om/build source-snippet data {:opts "filter"})
              )
