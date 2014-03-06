@@ -126,38 +126,47 @@
                [:text {:x 20 :y 150 :style {:font-size "64pt"
                                             :color "white"} :fill "white"} (str n)])]
 
+            ;;
+
+
             ;; Put
             [:g {:transform "translate(160,65)"
                  :onClick (fn [_]
                             (when-let [n (om/get-state owner :pending-put)]
                               (om/set-state! owner :pending-put nil)
                               (go
-                                (>! ch (str n))
+                                (>! ch n)
                                 (new-random-pick owner)
                                 ;; Forces a re-render
                                 (om/set-state! owner :modified (new js/Date)))))}
-             [:rect {:x 0 :y 0 :width 100 :height 100 :fill "red"}]
+             [:rect {:x 0 :y 0 :width 100 :height 100 :fill "black"}]
              [:text {:x 0 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} ">!"]]
 
             ;; Buffer
             (for [x (range bufsize)]
-              [:g {:transform (str "translate(300,320)")}
+              [:g {:transform (str "translate(280,320)")}
                [:g {:transform (str "rotate(" (- (* (- x (/ bufsize 2) (- 1)) (/ 180 bufsize))) ") translate(200)")}
                 [:circle {:cx 0 :cy radius :r radius :style {:fill "#224"}}]
                 [:text {:x (- 0 (/ radius 2) 5) :y (* 1.7 radius) :style {:font-size default-font :fill "white"}}
                  (str (aget (.-arr (.-buf buf)) (mod (+ x (.-head (.-buf buf))) bufsize)))]]])
 
-            ;; Take
-            [:g {:transform "translate(160,475)"
-                 :onClick (fn [_]
-                            (go
-                              (om/set-state! owner :last-get (<! ch))
-                              (om/set-state! owner :modified (new js/Date))))}
+            (let [ops (:ops data)]
 
-             [:rect {:x 0 :y 0 :width 100 :height 100 :fill "black"}]
-             [:text {:x 0 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} "<!"]
+              ;; Take
+              [:g {:transform "translate(160,475)"
+                   ;; TODO add ops here
+                   :onClick (fn [_]
+                              (go
+                                (let [v (<! (case ops
+                                              :map (map< inc ch)
+                                              ch))]
+                                  (om/set-state! owner :last-get v))
+                                (om/set-state! owner :modified (new js/Date))))}
 
-             ]
+               [:rect {:x 0 :y 0 :width 100 :height 100 :fill "black"}]
+               [:text {:x 0 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} "<!"]
+
+               ])
 
             ;; Receive box
             [:g  {:transform "translate(30,475)"}
@@ -342,7 +351,7 @@
            ]]]]))))
 
 (def app-model
-  (atom {:current-slide 4
+  (atom {:current-slide 7
          :slides
          ;; TODO Add cardinal such that each slide has its own number to avoid react warning
          (vec
@@ -374,7 +383,7 @@
              :custom channels-slide
              :opts {:buffer-size 7 :font-size "72pt" :radius 40}}
 
-            {:subtitle "putting on a channel"
+            {:subtitle "put"
              :custom channels-slide
              :put true
              :opts {:buffer-size 7 :font-size "72pt" :radius 40}}
@@ -382,6 +391,11 @@
             ;; TODO Add source code on right hand side of slide
             {:subtitle "put and take"
              :custom put-and-take-slide
+             :opts {:buffer-size 7 :font-size "72pt" :radius 50}}
+
+            {:subtitle "put and take with map"
+             :custom put-and-take-slide
+             :ops :map
              :opts {:buffer-size 7 :font-size "72pt" :radius 50}}
 
             {:subtitle "timeouts"
