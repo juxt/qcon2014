@@ -1,5 +1,5 @@
 ;; Copyright © 2013, JUXT LTD. All Rights Reserved.
-(def jig-version "2.0.2-SNAPSHOT")
+(def jig-version "2.0.3")
 
 (defproject qcon "0.1.0-SNAPSHOT"
   :description "Slides for Malcolm Sparks's core.async talk at QCon 2014"
