@@ -615,7 +615,7 @@
 
             ;; TODO Don't forget to mention Hecuba and Stentor (that they're free software)
             {:title "Q & A"
-             :text "(map answer (take n questions))"}
+             :text "(take n (map answer questions))"}
 
             {:title "Thank you"
              :text "Please evaluate my talk via the mobile app!"}]))}))
