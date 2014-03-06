@@ -137,7 +137,7 @@
                                (when-let [n (om/get-state owner :pending-put)]
                                  (om/set-state! owner :pending-put nil)
                                  (go
-                                   (>! ch (str n))
+                                   (>! ch n)
                                    (new-random-pick owner)
                                    ;; Forces a re-render
                                    (om/set-state! owner :modified (new js/Date)))))}
