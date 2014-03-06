@@ -3,6 +3,9 @@
 ;; This is a slide presentation using ClojureScript and Om. Please feel
 ;; free to make use of this code for your own presentations.
 
+;; This slidedeck was written in a hurry, and so isn't anywhere close to
+;; my usual coding standards. :(
+
 (ns qcon.main
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require
