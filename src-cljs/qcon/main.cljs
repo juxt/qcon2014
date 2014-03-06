@@ -20,8 +20,14 @@
 
 (def debug false)
 
+(def diagram-width 480)
+(def diagram-height 580)
+
 (def svg-attrs
-  {:version "1.1" :width 540 :height 600})
+  {:version "1.1" :width diagram-width :height diagram-height})
+
+(defn border []
+  [:rect {:x 0 :y 0 :width diagram-width :height diagram-height :stroke "#888" :stroke-width 1 :fill "black"}])
 
 (defn source-snippet [data owner {}]
   (reify
@@ -60,8 +66,8 @@
     om/IRender
     (render [_]
       (html
-       [:div {:style {:float "right" :width (if (:custom data) "48%" "100%")
-                      :font-size (or (get-in data [:code :font-size]) "24pt")} }]))
+       [:div {:style {:float "right" :width (if (:custom data) "50%" "100%")
+                      :font-size (or (get-in data [:code :font-size]) "20pt")} }]))
     om/IDidUpdate
     (did-update [this prev-props prev-state]
       (when (om/get-state owner :text)
@@ -176,9 +182,6 @@
                  (str (aget (.-arr (.-buf buf)) x))]]])
 
             ]]])))))
-
-(defn border []
-  [:rect {:x 0 :y 0 :width 540 :height 600 :stroke "#888" :stroke-width 1 :fill "black"}])
 
 (defn put-and-take-slide [data owner opts]
   (reify
@@ -493,18 +496,18 @@
             {:subtitle "put"
              :custom channels-slide
              :put true
-             :code {:literal "(>! (chan 7)
+             :code {:literal2 "(>! (chan 7)
   (inc (rand-int 9)))"
-                    :font-size "40pt"}
+                    :source "qcon.examples/put-rnd-no"
+                    :lang :clojure}
 
              :opts {:buffer-size 7 :font-size "72pt" :radius 40}}
 
-            ;; TODO Add source code on right hand side of slide
             {:subtitle "put and take"
              :custom put-and-take-slide
              :code {:source "cljs/core/async.cljs"
                     :range [20 40]}
-             :opts {:buffer-size 7 :font-size "72pt" :radius 40}}
+             :opts {:buffer-size 7 :font-size "50pt" :radius 40}}
 
             {:subtitle "put and take with map< inc"
              :custom put-and-take-slide
