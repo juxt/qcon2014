@@ -664,7 +664,7 @@
                       {:key :slideno :init-state chans :opts (:current-slide app)})
 
         (when (pos? (:current-slide app))
-          [:p {:style {:position "fixed" :right "10px" :bottom "10px"}} (str (inc (:current-slide app)) "/" (count (:slides app)))])]))))
+          [:p {:style {:position "fixed" :right "10px" :top "10px" :font-size "16pt"}} (str (inc (:current-slide app)) "/" (count (:slides app)))])]))))
 
 
 (om/root slides app-model {:target (.getElementById js/document "content")})
