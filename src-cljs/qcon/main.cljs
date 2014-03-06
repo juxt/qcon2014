@@ -449,7 +449,7 @@
            ]]]]))))
 
 (def app-model
-  (atom {:current-slide 23
+  (atom {:current-slide 21
          :slides
          ;; TODO Add cardinal such that each slide has its own number to avoid react warning
          (vec
@@ -459,21 +459,21 @@
              :text "Malcolm Sparks — QCon 2014"
              }
 
+            {
+             :background "/static/IKEA.png"
+             }
+
+            {:subtitle "These slides"
+             :bullets ["Available in kit-form: https://github.com/juxt/qcon2014"
+                       "Available ready assembled: http://qcon.juxt.pro:8000"]
+             }
+
             {:subtitle "Adventures with core.async"
              :event "QCon 2014"
              :author "Malcolm Sparks"
              :company "JUXT — https://juxt.pro"
              :email "malcolm@juxt.pro"
              :twitter "@malcolmsparks"
-             }
-
-            {
-             :background "/static/IKEA.png"
-             }
-
-            {:subtitle "These slides"
-             :bullets ["Available in kit-form: http://github.com/juxt/qcon2014"
-                       "Available ready assembled: http://qcon.juxt.pro:8000"]
              }
 
             {:title "What is core.async?"}
@@ -514,7 +514,7 @@
 
             #_{:subtitle "buffers"
                :code {:source "cljs/core/async.cljs"
-                    :range [17 34]}}
+                      :range [17 34]}}
 
             {:subtitle "channels"
              :bullets ["Form a one-way communcation path way between processes"
@@ -522,11 +522,11 @@
                        ]
              }
 
-            {:subtitle "channels"
-             :custom channels-slide
-             :code {:literal "(chan)"
-                    :font-size "50pt"}
-             :opts {:buffer-size 1 :font-size "72pt" :radius 40}}
+            #_{:subtitle "channels"
+               :custom channels-slide
+               :code {:literal "(chan)"
+                      :font-size "50pt"}
+               :opts {:buffer-size 1 :font-size "72pt" :radius 40}}
 
             {:subtitle "channels"
              :custom channels-slide
@@ -551,9 +551,14 @@
 
             {:subtitle "put and take"
              :custom put-and-take-slide
-             :code {:source "cljs/core/async.cljs"
-                    :range [20 40]}
+             :code {:source "qcon.examples/take-rnd-no"
+                    }
              :opts {:buffer-size 7 :font-size "72pt" :radius 40}}
+
+            #_{:subtitle "core.async code"
+               :code {:source "cljs/core/async.cljs"
+                      :range [20 40]}
+               :opts {:buffer-size 7 :font-size "72pt" :radius 40}}
 
             {:subtitle "channels ops"
              :bullets []}
@@ -597,10 +602,10 @@
                     :radius 60 :font-size "40pt"}}
 
             #_{:subtitle "catch game"
-             :custom catch-game-slide
-             :opts {:width 600 :height 600
-                    :circles 13
-                    :radius 30 :font-size "20pt"}}
+               :custom catch-game-slide
+               :opts {:width 600 :height 600
+                      :circles 13
+                      :radius 30 :font-size "20pt"}}
 
             {:subtitle "And that's not all!"
              :bullets ["Mixers"

@@ -1,11 +1,19 @@
 ;; Copyright © 2013, JUXT LTD. All Rights Reserved.
 (ns qcon.examples
-  (:require [clojure.core.async :refer (chan buffer >!)]))
+  (:require [clojure.core.async :refer (chan buffer >! <!)]))
 
 (defn put-rnd-no []
   (let [ch (chan 7)]
     (>! ch
         (inc (rand-int 9)))))
+
+
+(defn take-rnd-no []
+  (let [ch (chan 7)]
+    (>! ch
+        (inc (rand-int 9)))
+    (println (<! ch))
+    ))
 
 (defn example-1 []
   (chan))

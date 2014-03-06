@@ -13,6 +13,11 @@ pre {
   margin: 2px;
 }
 
+h2 {
+  padding: 2px;
+  margin: 2px;
+}
+
 a {
   box-shadow: none !important
 }
