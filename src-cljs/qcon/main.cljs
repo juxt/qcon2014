@@ -532,6 +532,11 @@
                     :font-size "50pt"}
              :opts {:buffer-size 7 :font-size "72pt" :radius 40}}
 
+            {:subtitle "put and take"
+             :bullets ["Send and receive messages"
+                       "Can be used for orchestration"
+                       "Threaded (blocking) mode versus lightweight mode"]}
+
             {:subtitle "put"
              :custom channels-slide
              :put true
@@ -548,6 +553,9 @@
                     :range [20 40]}
              :opts {:buffer-size 7 :font-size "72pt" :radius 40}}
 
+            {:subtitle "channels ops"
+             :bullets []}
+
             {:subtitle "put and take with map< inc"
              :custom put-and-take-slide
              :ops :map
@@ -562,28 +570,35 @@
             ;; TODO Now timeouts and alts
 
             {:subtitle "timeouts"
+             :bullets []}
+
+            {:subtitle "timeouts"
              :custom timeout-slide
              :opts {:font-size "72pt"}}
+
+            {:subtitle "alts"
+             :bullets []}
 
             {:subtitle "alts!"
              :custom alts-slide
              :opts {:font-size "30pt"}}
 
-            ;; TODO Now more explanation (filler) for go blocks
+            {:subtitle "go blocks"
+             :bullets ["Similar to Go's 'go routines'"
+                       "Eliminate callbacks in code"
+                       "Implemented as a macro"]}
 
             {:subtitle "go blocks"
              :custom go-block-slide
              :opts {:width 600 :height 600
                     :circles 7
-                    :radius 60 :font-size "40pt"}
-             }
+                    :radius 60 :font-size "40pt"}}
 
             {:subtitle "catch game"
              :custom catch-game-slide
              :opts {:width 600 :height 600
                     :circles 13
-                    :radius 30 :font-size "20pt"}
-             }
+                    :radius 30 :font-size "20pt"}}
 
             {:subtitle "And that's not all!"
              :bullets ["Mixers"
@@ -609,7 +624,7 @@
 
             {:background "/static/webcam.jpg"}
 
-            {:title "For further reference"
+            {:title "Example projects"
              :text "Some free software projects using core.async"}
 
             {:subtitle "MastodonC Hecuba"
