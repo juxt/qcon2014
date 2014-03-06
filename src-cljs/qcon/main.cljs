@@ -467,6 +467,10 @@
              :twitter "@malcolmsparks"
              }
 
+            {
+             :background "/static/IKEA.png"
+             }
+
             {:subtitle "These slides"
              :bullets ["Available in kit-form: http://github.com/juxt/qcon2014"
                        "Available ready assembled: http://qcon.juxt.pro:8000"]
@@ -482,9 +486,7 @@
                        "Available in Clojure and ClojureScript"]
              }
 
-            #_{
-             :background "/static/csplang.png"
-             }
+
 
             {:subtitle "Communicating Sequential Processes?"
              :bullets ["Started with a paper in 1978 by Anthony Hoare"
@@ -594,7 +596,7 @@
                     :circles 7
                     :radius 60 :font-size "40pt"}}
 
-            {:subtitle "catch game"
+            #_{:subtitle "catch game"
              :custom catch-game-slide
              :opts {:width 600 :height 600
                     :circles 13
