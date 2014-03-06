@@ -38,3 +38,10 @@
     (set :label
          (rand-int 10))
     (recur)))
+
+(defn demo-orch [ch others]
+  (go-loop [n 0]
+    (<! ch)
+    (let [to (get others (rand-int (count others)))]
+      (>! to "MESSAGE"))
+    (recur (inc n))))

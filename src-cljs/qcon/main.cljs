@@ -399,7 +399,7 @@
        (vec
         (for [n (range (:circles opts))]
           (let [angle (* n (/ (* 2 Math/PI) (:circles opts)))
-                offset (* .8 (/ (- (min (:width opts) (:height opts)) (:radius opts)) 2))]
+                offset (* .6 (/ (- (min (:width opts) (:height opts)) (:radius opts)) 2))]
             {:id n
              :position [(* offset (Math/cos angle))
                         (- (* offset (Math/sin angle)))]
@@ -420,32 +420,33 @@
         [:svg svg-attrs
          (border)
          [:g
-          [:rect {:x 0 :y 0 :width (:width opts) :height (:height opts) :fill "#222"}]
+          [:rect {:x 0 :y 0 :width (:width opts) :height (:height opts) :fill "#000"}]
           ;; Center the diagram
-          [:g {:transform (str "translate(" (/ (:width opts) 2) "," (/ (:height opts) 2) ")")}
+          [:g {:transform "translate(-50,0)"}
+           [:g {:transform (str "translate(" (/ (:width opts) 2) "," (/ (:height opts) 2) ")")}
 
-           ;; Draw the paths
-           (for [[x1 y1] (map :position (om/get-state owner :instances))
-                 [x2 y2] (map :position (om/get-state owner :instances))]
-             [:line {:x1 x1 :y1 y1 :x2 x2 :y2 y2 :stroke "#222" :stroke-width 3}])
+            ;; Draw the paths
+            (for [[x1 y1] (map :position (om/get-state owner :instances))
+                  [x2 y2] (map :position (om/get-state owner :instances))]
+              [:line {:x1 x1 :y1 y1 :x2 x2 :y2 y2 :stroke "#222" :stroke-width 3}])
 
-           ;; Draw the go-blocks
-           (let [instances (om/get-state owner :instances)]
-             (for [{:keys [id position channel] :as instance} instances]
-               (let [[x y] position]
-                 [:g {:transform (str "translate(" x "," y ")")}
-                  (om/build
-                   go-block data
-                   {:opts (merge {:radius (:radius opts)
-                                  :font-size (:font-size opts)
-                                  :slide owner
-                                  :algo catch-game-player
-                                  :instances instances} instance)})])))
+            ;; Draw the go-blocks
+            (let [instances (om/get-state owner :instances)]
+              (for [{:keys [id position channel] :as instance} instances]
+                (let [[x y] position]
+                  [:g {:transform (str "translate(" x "," y ")")}
+                   (om/build
+                    go-block data
+                    {:opts (merge {:radius (:radius opts)
+                                   :font-size (:font-size opts)
+                                   :slide owner
+                                   :algo catch-game-player
+                                   :instances instances} instance)})])))
 
-           (when-let [[x y] (om/get-state owner :message)]
-             [:circle {:cx x :cy y :r 10 :fill "yellow" }])
+            (when-let [[x y] (om/get-state owner :message)]
+              [:circle {:cx x :cy y :r 10 :fill "yellow" }])
 
-           ]]]]))))
+            ]]]]]))))
 
 (def app-model
   (atom {:current-slide 28
@@ -624,8 +625,11 @@
                     :circles 7
                     :radius 60 :font-size "40pt"}}
 
-            #_{:subtitle "catch game"
+            {:subtitle "Process orchestration"
                :custom catch-game-slide
+             :code {:source "qcon.examples/demo-orch"
+                    :lang :clojure
+                    }
                :opts {:width 600 :height 600
                       :circles 13
                       :radius 30 :font-size "20pt"}}
