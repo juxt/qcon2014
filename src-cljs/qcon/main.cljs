@@ -457,7 +457,7 @@
                        "Available in Clojure and ClojureScript"]
              }
 
-            {:title "Quick tutorial"}
+            {:title "But what is core.async?"}
 
             #_{:subtitle "buffers"
                :code {:source "cljs/core/async.cljs"
