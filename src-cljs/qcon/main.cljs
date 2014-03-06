@@ -635,9 +635,9 @@
                       :radius 30 :font-size "20pt"}}
 
             {:subtitle "And that's not all!"
-             :bullets ["Mixers"
-                       "Pub/sub"
-                       "https://github.com/clojure/core.async.git"]}
+             :bullets ["Multiplexing"
+                       "Mixers"
+                       "Pub/sub"]}
 
             ;; TODO result of race in alts! between a channel and a timeout
 
@@ -676,7 +676,7 @@
              :url "https://github.com/OpenSensorsIO/azondi"
              :bullets ["Builds on MQTT Broker"
                        "Designed for IoT volume traffic"
-                       "Uses LMAX disruptor"
+                       "Uses LMAX disruptor patterns"
                        "Advanced routing logic"]}
 
             ;; TODO Don't forget to mention Hecuba and Stentor (that they're free software)
