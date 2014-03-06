@@ -15,7 +15,7 @@
    [om.dom :as dom :include-macros true]
    [sablono.core :as html :refer-macros [html]]
    [ankha.core :as ankha]
-   [cljs.core.async :refer [<! >! timeout buffer chan put! sliding-buffer close! pipe map< filter<]]
+   [cljs.core.async :refer [<! >! timeout buffer dropping-buffer sliding-buffer chan put! sliding-buffer close! pipe map< filter<]]
    [clojure.string :as string]
    [ajax.core :refer (GET POST)]))
 
@@ -452,7 +452,7 @@
             ]]]]]))))
 
 (def app-model
-  (atom {:current-slide 28
+  (atom {:current-slide 0
          :slides
          ;; TODO Add cardinal such that each slide has its own number to avoid react warning
          (vec
