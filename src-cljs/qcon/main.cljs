@@ -562,7 +562,8 @@
                :opts {:buffer-size 7 :font-size "72pt" :radius 40}}
 
             {:subtitle "channels ops"
-             :bullets ["map< map>"]}
+             :bullets ["Like functions, channels are composeable"
+                       "Complex behaviour can be built up from small primitives"]}
 
             {:subtitle "put and take with map< inc"
              :custom put-and-take-slide
@@ -586,17 +587,24 @@
 
             ;; TODO Now timeouts and alts
 
+            {:subtitle "close!"
+             :bullets ["Close a channel with close!"
+                       "Subsequence takes will return nil"]}
+
             {:subtitle "timeouts"
-             :bullets []}
+             :bullets ["Channels which wait for a period of time before closing"
+                       "Useful for all kinds of patterns (resource retry, batch writes, etc.)"]}
 
             {:subtitle "timeouts"
              :custom timeout-slide
              :opts {:font-size "72pt"}}
 
             {:subtitle "alts"
-             :bullets []}
+             :bullets ["Take from multiple channels simultaneously"
+                       "'or' semantics"
+                       "Great for concurrency"]}
 
-            {:subtitle "alts!"
+            #_{:subtitle "alts"
              :custom alts-slide
              :opts {:font-size "30pt"}}
 

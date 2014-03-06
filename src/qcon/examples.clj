@@ -19,7 +19,7 @@
   (let [ch (chan 7)]
     (>! ch
         (inc (rand-int 9)))
-    (println (<! (map< inc ch)))
+    (<! (map< inc ch))
     ))
 
 (defn example-1 []
