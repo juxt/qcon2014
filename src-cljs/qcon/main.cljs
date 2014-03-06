@@ -393,10 +393,15 @@
              :custom put-and-take-slide
              :opts {:buffer-size 7 :font-size "72pt" :radius 50}}
 
-            {:subtitle "put and take with map"
+            {:subtitle "put and take with map< inc"
              :custom put-and-take-slide
              :ops :map
              :opts {:buffer-size 7 :font-size "72pt" :radius 50}}
+
+            ;; TODO "put and take with map> dec"
+            ;; TODO "put and take with filter
+
+            ;; TODO Now timeouts and alts
 
             {:subtitle "timeouts"
              :custom timeout-slide
@@ -406,12 +411,16 @@
              :custom alts-slide
              :opts {:font-size "30pt"}}
 
+            ;; TODO Now more explanation (filler) for go blocks
+
             {:subtitle "go blocks"
              :custom go-block-slide
              :opts {:width 600 :height 600
                     :circles 7
                     :radius 60 :font-size "40pt"}
              }
+
+            ;; TODO Slow down catch game
 
             #_{:subtitle "catch game"
              :custom catch-game-slide
@@ -420,11 +429,14 @@
                     :radius 30 :font-size "20pt"}
              }
 
-            ;; TODO Show source code from cljs sources on disk - via cljs - use different namespaces
-
             ;; TODO result of race in alts! between a channel and a timeout
 
             ;; Go blocks
+
+            ;; Now a Hecuba table (one hour on this, to create a data set for order/orderlines and a diagram)
+
+            {:title "Why core.async?"
+             :text "(it's about decoupling)"}
 
             {:title "References"
              :text "Some free software projects using core.async"}
