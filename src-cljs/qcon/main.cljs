@@ -6,6 +6,7 @@
 (ns qcon.main
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require
+;;   qcon.snippets
    [om.core :as om :include-macros true]
    [goog.events.KeyCodes :as kc]
    [om.dom :as dom :include-macros true]
@@ -26,19 +27,25 @@
   (reify
     om/IWillMount
     (will-mount [_]
-      (GET (str "/js/" (get-in data [:code :source]))
-          (-> {:handler (fn [e]
-                          (om/set-state! owner
-                                         :text (if-let [[from to] (get-in @data [:code :range])]
-                                                 (->>
-                                                  (string/split-lines e)
-                                                  (drop (dec from))
-                                                  (take (- to from))
-                                                  (interpose "\n")
-                                                  (apply str))
-                                                 e)))
-               :headers {"Accept" "text/plain"}
-               :response-format :raw})))
+      (when-let [source (get-in data [:code :source])]
+        (GET (str "/js/" source)
+            (-> {:handler (fn [e]
+                            (om/set-state! owner
+                                           :text (if-let [[from to] (get-in @data [:code :range])]
+                                                   (->>
+                                                    (string/split-lines e)
+                                                    (drop (dec from))
+                                                    (take (- to from))
+                                                    (interpose "\n")
+                                                    (apply str))
+                                                   e)))
+                 :headers {"Accept" "text/plain"}
+                 :response-format :raw})))
+
+      (when-let [literal (get-in data [:code :literal])]
+        (om/set-state! owner :text literal)
+        )
+      )
     om/IRender
     (render [_]
       (html
@@ -451,12 +458,14 @@
 
             {:title "Quick tutorial"}
 
-            {:subtitle "buffers"
-             :code {:source "cljs/core/async.cljs"
+            #_{:subtitle "buffers"
+               :code {:source "cljs/core/async.cljs"
                     :range [17 34]}}
 
             {:subtitle "channels"
              :custom channels-slide
+             :code {:literal "(chan 7)"
+                    :range [10 13]}
              :opts {:buffer-size 7 :font-size "72pt" :radius 40}}
 
             {:subtitle "put"
