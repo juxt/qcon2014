@@ -337,7 +337,7 @@
       {:circles
        (for [n (range (:circles opts))]
          (let [angle (* n (/ (* 2 Math/PI) (:circles opts)))
-               offset (* .8 (/ (- (min (:width opts) (:height opts)) (:radius opts)) 2))]
+               offset (* .6 (/ (- (min (:width opts) (:height opts)) (:radius opts)) 2))]
            [(* offset (Math/cos angle))
             (- (* offset (Math/sin angle)))]))})
     om/IRender
@@ -345,9 +345,9 @@
       (html
        [:div
         [:svg svg-attrs
-         (border)
-         [:g
-          [:rect {:x 0 :y 0 :width (:width opts) :height (:height opts) :fill "#222"}]
+         ;;(border)
+         [:g {:transform "translate(-70,0)"}
+          #_[:rect {:x 0 :y 0 :width (:width opts) :height (:height opts) :fill "#222"}]
           ;; Center the diagram
           [:g {:transform (str "translate(" (/ (:width opts) 2) "," (/ (:height opts) 2) ")")}
            (for [[x y] (om/get-state owner :circles)]
@@ -448,7 +448,7 @@
            ]]]]))))
 
 (def app-model
-  (atom {:current-slide 24
+  (atom {:current-slide 28
          :slides
          ;; TODO Add cardinal such that each slide has its own number to avoid react warning
          (vec
@@ -617,6 +617,9 @@
 
             {:subtitle "go blocks"
              :custom go-block-slide
+             :code {:source "qcon.examples/demo-go-loop"
+                    :lang :clojure
+                    }
              :opts {:width 600 :height 600
                     :circles 7
                     :radius 60 :font-size "40pt"}}
