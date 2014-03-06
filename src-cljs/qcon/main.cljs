@@ -19,6 +19,68 @@
 
 (def debug false)
 
+(defn source-snippet [data owner {}]
+  (reify
+    om/IWillMount
+    (will-mount [_]
+      (GET (str "/js/" (get-in data [:code :source]))
+          (-> {:handler (fn [e]
+                          (om/set-state! owner
+                                         :text (if-let [[from to] (get-in @data [:code :range])]
+                                                 (->>
+                                                  (string/split-lines e)
+                                                  (drop (dec from))
+                                                  (take (- to from))
+                                                  (interpose "\n")
+                                                  (apply str))
+                                                 e)))
+               :headers {"Accept" "text/plain"}
+               :response-format :raw})))
+    om/IRender
+    (render [_]
+      (html
+       [:div {:style {:float "right" :width (if (:custom data) "48%" "100%")}}]))
+    om/IDidUpdate
+    (did-update [this prev-props prev-state]
+      (when (om/get-state owner :text)
+        (let [n (om/get-node owner)]
+          (while (.hasChildNodes n)
+            (.removeChild n (.-lastChild n))))
+        (let [pre (.createElement js/document "pre")]
+          (set! (.-innerHTML pre) (.-value (hljs.highlightAuto (om/get-state owner :text))))
+          (.appendChild (om/get-node owner) pre)
+          )))))
+
+#_(defn clj-source-snippet [data owner fname]
+  (reify
+    om/IWillMount
+    (will-mount [_]
+      (GET "/source"
+          (-> {:handler (fn [e]
+                          (om/set-state! owner :text e))
+               :headers {"Accept" "text/plain"}
+               :response-format :raw})))
+    om/IRender
+    (render [_]
+      #_(println "rendering source: " (om/get-state owner :text))
+      (html
+       [:div]))
+    om/IDidUpdate
+    (did-update [this prev-props prev-state]
+      ;; Attempt at syntax highlighting
+      (println "did-update" (om/get-state owner :text))
+      (println (.-value (hljs.highlightAuto "(foo)")))
+
+      #_(println (SyntaxHighlighter.getHtml (om/get-state owner :text)))
+      (when (om/get-state owner :text)
+        (let [n (om/get-node owner)]
+          (while (.hasChildNodes n)
+            (.removeChild n (.-lastChild n))))
+        (let [pre (.createElement js/document "pre")]
+          (set! (.-innerHTML pre) (.-value (hljs.highlightAuto (om/get-state owner :text))))
+          (.appendChild (om/get-node owner) pre)
+          )))))
+
 (defn new-random-pick [owner]
   (go-loop [c 4]
     (om/set-state! owner :pending-put nil)
@@ -92,6 +154,9 @@
 
             ]]])))))
 
+(defn border [width height]
+  [:rect {:x 0 :y 0 :width width :height height :stroke "#888" :stroke-width 1 :fill "black"}])
+
 (defn put-and-take-slide [data owner opts]
   (reify
     om/IInitState
@@ -113,9 +178,13 @@
             radius (om/get-state owner :radius)]
         (html
          [:div
-          [:svg {:version "1.1" :width 800 :height 600}
+          ;;(om/build source-snippet data {})
 
-           [:g {:transform "translate(100,0)"}
+          [:svg {:version "1.1" :width 540 :height 600}
+
+           (border 540 600)
+
+           [:g {:transform "translate(0,0)"}
 
             ;; Random box
             [:g {:transform "translate(30,0)"
@@ -144,7 +213,7 @@
 
             ;; Buffer
             (for [x (range bufsize)]
-              [:g {:transform (str "translate(280,320)")}
+              [:g {:transform (str "translate(275,320)")}
                [:g {:transform (str "rotate(" (- (* (- x (/ bufsize 2) (- 1)) (/ 180 bufsize))) ") translate(200)")}
                 [:circle {:cx 0 :cy radius :r radius :style {:fill "#224"}}]
                 [:text {:x (- 0 (/ radius 2) 5) :y (* 1.7 radius) :style {:font-size default-font :fill "white"}}
@@ -351,7 +420,7 @@
            ]]]]))))
 
 (def app-model
-  (atom {:current-slide 7
+  (atom {:current-slide 6
          :slides
          ;; TODO Add cardinal such that each slide has its own number to avoid react warning
          (vec
@@ -391,12 +460,16 @@
             ;; TODO Add source code on right hand side of slide
             {:subtitle "put and take"
              :custom put-and-take-slide
-             :opts {:buffer-size 7 :font-size "72pt" :radius 50}}
+             :code {:source "cljs/core/async.cljs"
+                    :range [20 40]}
+             :opts {:buffer-size 7 :font-size "72pt" :radius 40}}
 
             {:subtitle "put and take with map< inc"
              :custom put-and-take-slide
              :ops :map
-             :opts {:buffer-size 7 :font-size "72pt" :radius 50}}
+             :code {:source "cljs/core/async.cljs"
+                    :range [30 34]}
+             :opts {:buffer-size 7 :font-size "72pt" :radius 40}}
 
             ;; TODO "put and take with map> dec"
             ;; TODO "put and take with filter
@@ -445,7 +518,7 @@
              :url "https://github.com/mastodonc/kixi.hecuba"
              :bullets ["Uses core.async to wire together Om components"]}
 
-            ;; Hecuba demo
+            ;; TODO Add in Clojure Exchange talk on OpenSensors - demo of SSE
 
             {:subtitle "MQTT Broker"
              :url "https://github.com/OpenSensorsIO/mqtt-broker"
@@ -465,68 +538,6 @@
 
             {:title "Thank you"
              :text "Please evaluate my talk via the mobile app!"}]))}))
-
-(defn source-snippet [data owner {}]
-  (reify
-    om/IWillMount
-    (will-mount [_]
-      (GET (str "/js/" (get-in data [:code :source]))
-          (-> {:handler (fn [e]
-                          (om/set-state! owner
-                                         :text (if-let [[from to] (get-in @data [:code :range])]
-                                                 (->>
-                                                  (string/split-lines e)
-                                                  (drop (dec from))
-                                                  (take (- to from))
-                                                  (interpose "\n")
-                                                  (apply str))
-                                                 e)))
-               :headers {"Accept" "text/plain"}
-               :response-format :raw})))
-    om/IRender
-    (render [_]
-      (html
-       [:div]))
-    om/IDidUpdate
-    (did-update [this prev-props prev-state]
-      (when (om/get-state owner :text)
-        (let [n (om/get-node owner)]
-          (while (.hasChildNodes n)
-            (.removeChild n (.-lastChild n))))
-        (let [pre (.createElement js/document "pre")]
-          (set! (.-innerHTML pre) (.-value (hljs.highlightAuto (om/get-state owner :text))))
-          (.appendChild (om/get-node owner) pre)
-          )))))
-
-(defn clj-source-snippet [data owner fname]
-  (reify
-    om/IWillMount
-    (will-mount [_]
-      (GET "/source"
-          (-> {:handler (fn [e]
-                          (om/set-state! owner :text e))
-               :headers {"Accept" "text/plain"}
-               :response-format :raw})))
-    om/IRender
-    (render [_]
-      #_(println "rendering source: " (om/get-state owner :text))
-      (html
-       [:div]))
-    om/IDidUpdate
-    (did-update [this prev-props prev-state]
-      ;; Attempt at syntax highlighting
-      (println "did-update" (om/get-state owner :text))
-      (println (.-value (hljs.highlightAuto "(foo)")))
-
-      #_(println (SyntaxHighlighter.getHtml (om/get-state owner :text)))
-      (when (om/get-state owner :text)
-        (let [n (om/get-node owner)]
-          (while (.hasChildNodes n)
-            (.removeChild n (.-lastChild n))))
-        (let [pre (.createElement js/document "pre")]
-          (set! (.-innerHTML pre) (.-value (hljs.highlightAuto (om/get-state owner :text))))
-          (.appendChild (om/get-node owner) pre)
-          )))))
 
 (defn slide [data owner current]
   (reify
@@ -565,9 +576,6 @@
              [:h3 [:a {:href url} url]]
              )
 
-           (when-let [custom (:custom data)]
-             (om/build custom data {:opts (:opts data)}))
-
            (when-let [event (:event data)]
              [:div {:style {:text-align "center" :margin-top "20pt"}}
               [:h3 event]
@@ -588,6 +596,11 @@
            (when-let [code (:code data)]
              (om/build source-snippet data {:opts code})
              )
+
+           (when-let [custom (:custom data)]
+             (om/build custom data {:opts (:opts data)}))
+
+
            ]
           ])))))
 
@@ -650,7 +663,8 @@
                       (:slides app)
                       {:key :slideno :init-state chans :opts (:current-slide app)})
 
-        [:p {:style {:position "fixed" :right "10px" :bottom "10px"}} (str "Current slide is " (inc (:current-slide app)) "/" (count (:slides app)))]]))))
+        (when (pos? (:current-slide app))
+          [:p {:style {:position "fixed" :right "10px" :bottom "10px"}} (str (inc (:current-slide app)) "/" (count (:slides app)))])]))))
 
 
 (om/root slides app-model {:target (.getElementById js/document "content")})
