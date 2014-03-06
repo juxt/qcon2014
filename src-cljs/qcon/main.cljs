@@ -12,6 +12,7 @@
    [sablono.core :as html :refer-macros [html]]
    [ankha.core :as ankha]
    [cljs.core.async :refer [<! >! timeout buffer chan put! sliding-buffer close! pipe map< filter<]]
+   [clojure.string :as string]
    [ajax.core :refer (GET POST)]))
 
 (enable-console-print!)
@@ -311,7 +312,8 @@
              :opts {:font-size "72pt"}}
 
             {:subtitle "buffers (TODO)"
-             :code "(<! (chan))"}
+             :code {:source "cljs/core/async.cljs"
+                    :range [10 20]}}
 
             {:subtitle "alts!"
              :custom alts-slide
@@ -324,7 +326,7 @@
                     :radius 60 :font-size "40pt"}
              }
 
-            {:subtitle "catch game"
+            #_{:subtitle "catch game"
              :custom catch-game-slide
              :opts {:width 600 :height 600
                     :circles 13
@@ -365,7 +367,39 @@
             {:title "Thank you"
              :text "Please evaluate my talk via the mobile app!"}]))}))
 
-(defn source-snippet [data owner fname]
+(defn source-snippet [data owner {}]
+  (reify
+    om/IWillMount
+    (will-mount [_]
+      (GET (str "/js/" (get-in data [:code :source]))
+          (-> {:handler (fn [e]
+                          (om/set-state! owner
+                                         :text (if-let [[from to] (get-in @data [:code :range])]
+                                                 (->>
+                                                  (string/split-lines e)
+                                                  (drop (dec from))
+                                                  (take (- to from))
+                                                  (interpose "\n")
+                                                  (apply str))
+                                                 e)))
+               :headers {"Accept" "text/plain"}
+               :response-format :raw})))
+    om/IRender
+    (render [_]
+      (html
+       [:div]))
+    om/IDidUpdate
+    (did-update [this prev-props prev-state]
+      (when (om/get-state owner :text)
+        (let [n (om/get-node owner)]
+          (while (.hasChildNodes n)
+            (.removeChild n (.-lastChild n))))
+        (let [pre (.createElement js/document "pre")]
+          (set! (.-innerHTML pre) (.-value (hljs.highlightAuto (om/get-state owner :text))))
+          (.appendChild (om/get-node owner) pre)
+          )))))
+
+(defn clj-source-snippet [data owner fname]
   (reify
     om/IWillMount
     (will-mount [_]
@@ -453,7 +487,7 @@
              )
 
            (when-let [code (:code data)]
-             (om/build source-snippet data {:opts "filter"})
+             (om/build source-snippet data {:opts code})
              )
            ]
           ])))))
