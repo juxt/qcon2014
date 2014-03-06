@@ -21,7 +21,7 @@
 (def debug false)
 
 (def diagram-width 480)
-(def diagram-height 560)
+(def diagram-height 580)
 
 (def svg-attrs
   {:version "1.1" :width diagram-width :height diagram-height})
@@ -456,17 +456,23 @@
           (map-indexed
            (fn [i m] (assoc m :slideno (str "slide-" (inc i))))
            [{:title "Adventures with core.async"
-             :author "Malcolm Sparks"
+             :text "Malcolm Sparks — QCon 2014"
              }
 
             {:subtitle "Adventures with core.async"
              :event "QCon 2014"
              :author "Malcolm Sparks"
-             :company "JUXT"
+             :company "JUXT — https://juxt.pro"
              :email "malcolm@juxt.pro"
              :twitter "@malcolmsparks"
-             :slides "https://qcon.juxt.pro:8000"
              }
+
+            {:subtitle "These slides"
+             :bullets ["Available in kit-form: http://github.com/juxt/qcon2014"
+                       "Available ready assembled: http://qcon.juxt.pro:8000"]
+             }
+
+            {:title "What is core.async?"}
 
             {:subtitle "What is core.async?"
              ;;:text "Here is the first slide"
@@ -476,24 +482,29 @@
                        "Available in Clojure and ClojureScript"]
              }
 
-            {:subtitle "Communicating Sequential Processes?"
-             :bullets ["Clojure library released May 2013"
-                       "Based on Communicating Sequential Processes"
-                       "Available in Clojure and ClojureScript"]
+            #_{
+             :background "/static/csplang.png"
              }
 
-            {:subtitle "What is core.async?"
+            {:subtitle "Communicating Sequential Processes?"
+             :bullets ["Started with a paper in 1978 by Anthony Hoare"
+                       "Then a book a few years later"]
+             }
+
+            {
              :background "/static/cspdiag.jpg"
              }
 
-            {:subtitle "What is core.async?"
+            {:title "But what is core.async?"}
+
+            {
              :background "/static/webcam.jpg"
-             :bullets ["Sugary substance used for all kinds of purposes"
-                       ]
+
              }
 
-
             {:title "But what is core.async?"}
+
+            {:title "Quick Tutorial"}
 
             {:title "Warning: Code ahead!"
              :warning true}
@@ -533,7 +544,7 @@
              :custom put-and-take-slide
              :code {:source "cljs/core/async.cljs"
                     :range [20 40]}
-             :opts {:buffer-size 7 :font-size "50pt" :radius 40}}
+             :opts {:buffer-size 7 :font-size "72pt" :radius 40}}
 
             {:subtitle "put and take with map< inc"
              :custom put-and-take-slide
@@ -601,10 +612,6 @@
             {:subtitle "Azondi"
              :url "https://github.com/OpenSensorsIO/azondi"
              :bullets ["Builds on MQTT Broker"]}
-
-            {:subtitle "This slide-deck"
-             :url "https://github.com/juxt/qcon"
-             :bullets [""]}
 
             ;; TODO Don't forget to mention Hecuba and Stentor (that they're free software)
             {:title "Q & A"
