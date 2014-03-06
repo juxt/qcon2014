@@ -8,7 +8,7 @@
    [hiccup.core :refer (html h)]
    [jig.util :refer (satisfying-dependency)]
    [liberator.core :refer (defresource)]
-   qcon.examples
+   [qcon.examples :refer (example-1)]
    jig)
   (:import
    (jig Lifecycle)
@@ -47,7 +47,7 @@
             (str text))))
       (throw (ex-info (format "Nil resource: %s" filepath) {})))))
 
-;; (println (source-fn (find-var (symbol "qcon.examples/example-1"))))
+(println (source-fn (find-var (symbol "qcon.examples/example-1"))))
 
 (defresource source-resource []
   :available-media-types #{"text/html" "text/plain"}

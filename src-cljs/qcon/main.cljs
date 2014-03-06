@@ -28,19 +28,30 @@
     om/IWillMount
     (will-mount [_]
       (when-let [source (get-in data [:code :source])]
-        (GET (str "/js/" source)
-            (-> {:handler (fn [e]
-                            (om/set-state! owner
-                                           :text (if-let [[from to] (get-in @data [:code :range])]
-                                                   (->>
-                                                    (string/split-lines e)
-                                                    (drop (dec from))
-                                                    (take (- to from))
-                                                    (interpose "\n")
-                                                    (apply str))
-                                                   e)))
-                 :headers {"Accept" "text/plain"}
-                 :response-format :raw})))
+        (case (get-in data [:code :lang])
+          :clojure
+          (do
+            (println "source = " (str "/source?" source))
+            (GET (str "/source?" source)
+                (-> {:handler (fn [e]
+                                (println "e is" e)
+                                (om/set-state! owner
+                                               :text e))
+                     :headers {"Accept" "text/plain"}
+                     :response-format :raw})))
+          (GET (str "/js/" source)
+              (-> {:handler (fn [e]
+                              (om/set-state! owner
+                                             :text (if-let [[from to] (get-in @data [:code :range])]
+                                                     (->>
+                                                      (string/split-lines e)
+                                                      (drop (dec from))
+                                                      (take (- to from))
+                                                      (interpose "\n")
+                                                      (apply str))
+                                                     e)))
+                   :headers {"Accept" "text/plain"}
+                   :response-format :raw}))))
 
       (when-let [literal (get-in data [:code :literal])]
         (om/set-state! owner :text literal)
@@ -498,7 +509,8 @@
             {:subtitle "put and take with map< inc"
              :custom put-and-take-slide
              :ops :map
-             :code {:source "cljs/core/async.cljs"
+             :code {:source "qcon.examples/example-1"
+                    :lang :clojure
                     :range [30 34]}
              :opts {:buffer-size 7 :font-size "72pt" :radius 40}}
 
