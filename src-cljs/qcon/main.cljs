@@ -449,7 +449,7 @@
            ]]]]))))
 
 (def app-model
-  (atom {:current-slide 21
+  (atom {:current-slide 24
          :slides
          ;; TODO Add cardinal such that each slide has its own number to avoid react warning
          (vec
@@ -552,6 +552,7 @@
             {:subtitle "put and take"
              :custom put-and-take-slide
              :code {:source "qcon.examples/take-rnd-no"
+                    :lang :clojure
                     }
              :opts {:buffer-size 7 :font-size "72pt" :radius 40}}
 
@@ -561,15 +562,24 @@
                :opts {:buffer-size 7 :font-size "72pt" :radius 40}}
 
             {:subtitle "channels ops"
-             :bullets []}
+             :bullets ["map< map>"]}
 
             {:subtitle "put and take with map< inc"
              :custom put-and-take-slide
              :ops :map
-             :code {:source "qcon.examples/example-1"
-                    :lang :clojure
-                    :range [30 34]}
+             :code {:source "qcon.examples/map-inc"
+                    :lang :clojure}
              :opts {:buffer-size 7 :font-size "72pt" :radius 40}}
+
+            {:subtitle "channels ops"
+             :bullets ["map< map>"
+                       "filter< filter>"
+                       "remove< remove>"
+                       "mapcat< mapcat>"
+                       "pipe split reduce"
+                       "onto-chan"
+                       "to-chan"
+                       ]}
 
             ;; TODO "put and take with map> dec"
             ;; TODO "put and take with filter
