@@ -379,7 +379,7 @@
             ydelta (/ (- (second to-pos) (second from-pos)) 18)]
 
         (go-loop [i 0]
-          (<! (timeout 1))
+          (<! (timeout 30))
           (om/set-state!
            slide :message
            [(+ (first from-pos) (* i xdelta))
@@ -449,7 +449,7 @@
            ]]]]))))
 
 (def app-model
-  (atom {:current-slide 0
+  (atom {:current-slide 23
          :slides
          ;; TODO Add cardinal such that each slide has its own number to avoid react warning
          (vec
@@ -488,19 +488,15 @@
 
             {:subtitle "Communicating Sequential Processes?"
              :bullets ["Started with a paper in 1978 by Anthony Hoare"
-                       "Then a book a few years later"]
-             }
+                       "Then a book a few years later"
+                       "Sound mathematical basis for concurrency"
+                       "Allows programs to be proven against deadlock - show such a proof"]}
 
-            {
-             :background "/static/cspdiag.jpg"
-             }
+            {:background "/static/cspdiag.jpg"}
 
             {:title "But what is core.async?"}
 
-            {
-             :background "/static/webcam.jpg"
-
-             }
+            {:background "/static/webcam.jpg"}
 
             {:title "But what is core.async?"}
 
@@ -517,6 +513,12 @@
             #_{:subtitle "buffers"
                :code {:source "cljs/core/async.cljs"
                     :range [17 34]}}
+
+            {:subtitle "channels"
+             :bullets ["Form a one-way communcation path way between processes"
+                       "Supported by buffers"
+                       ]
+             }
 
             {:subtitle "channels"
              :custom channels-slide
@@ -576,14 +578,17 @@
                     :radius 60 :font-size "40pt"}
              }
 
-            ;; TODO Slow down catch game
-
-            #_{:subtitle "catch game"
+            {:subtitle "catch game"
              :custom catch-game-slide
              :opts {:width 600 :height 600
                     :circles 13
                     :radius 30 :font-size "20pt"}
              }
+
+            {:subtitle "And that's not all!"
+             :bullets ["Mixers"
+                       "Pub/sub"
+                       "https://github.com/clojure/core.async.git"]}
 
             ;; TODO result of race in alts! between a channel and a timeout
 
@@ -594,9 +599,17 @@
             {:title "Why core.async?"
              :text "(it's about decoupling)"}
 
-            {:blockquote "If we de-couple, we can re-use."}
+            {:background "/static/queues.jpg"}
 
-            {:title "References"
+            {:blockquote "I don't know, I don't wanna know."
+             :author "Rich Hickey"}
+
+            {:blockquote "If we de-couple, we can re-use."
+             :author "Malcolm Sparks"}
+
+            {:background "/static/webcam.jpg"}
+
+            {:title "For further reference"
              :text "Some free software projects using core.async"}
 
             {:subtitle "MastodonC Hecuba"
@@ -607,11 +620,15 @@
 
             {:subtitle "MQTT Broker"
              :url "https://github.com/OpenSensorsIO/mqtt-broker"
-             :bullets ["Uses Netty"]}
+             :bullets ["Combines Netty and core.async"
+                       "Micro-implementation for educational purposes"]}
 
             {:subtitle "Azondi"
              :url "https://github.com/OpenSensorsIO/azondi"
-             :bullets ["Builds on MQTT Broker"]}
+             :bullets ["Builds on MQTT Broker"
+                       "Designed for IoT volume traffic"
+                       "Uses LMAX disruptor"
+                       "Advanced routing logic"]}
 
             ;; TODO Don't forget to mention Hecuba and Stentor (that they're free software)
             {:title "Q & A"
@@ -649,13 +666,21 @@
               [:p (:text data)]]
              )
 
+           (when-let [quote (:blockquote data)]
+             [:div
+              [:h1 ""]
+              [:blockquote (str "\"" quote "\"")]
+              [:p {:style {:text-align "right"}} (:author data)]
+              ]
+             )
+
            (when-let [subtitle (:subtitle data)]
              [:h2 subtitle]
 
              )
 
            (when-let [url (:url data)]
-             [:h3 [:a {:href url} url]]
+             [:p [:a {:href url} url]]
              )
 
            (when-let [event (:event data)]
@@ -713,11 +738,18 @@
          (cond
 
           ;; Hit 0, for beginning
-          (= (.-keyCode e) 188)
+          (= (.-keyCode e) 36)
           (om/update! app :current-slide 0)
 
-          (= (.-keyCode e) 190)
+          (= (.-keyCode e) 35)
           (om/update! app :current-slide (dec (count (:slides @app))))
+
+          (= (.-keyCode e) 188)
+          (om/transact! app :current-slide #(max 0 (- % 5)))
+
+          (= (.-keyCode e) 190)
+          (om/transact! app :current-slide #(min (dec (count (:slides @app))) (+ % 5)))
+
 
           (or (= (.-keyCode e) 37)
               (= (.-keyCode e) kc/PAGE_UP))
