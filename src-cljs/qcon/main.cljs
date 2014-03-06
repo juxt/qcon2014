@@ -492,10 +492,9 @@
 
 
             {:subtitle "Communicating Sequential Processes?"
-             :bullets ["Started with a paper in 1978 by Anthony Hoare"
-                       "Then a book a few years later"
+             :bullets ["Started with a paper in 1978 by Anthony Hoare, then a book a few years later"
                        "Sound mathematical basis for concurrency"
-                       "Allows programs to be proven against deadlock - show such a proof"]}
+                       "Allows programs to be proven against deadlock"]}
 
             {:background "/static/cspdiag.jpg"}
 
@@ -521,7 +520,7 @@
 
             {:subtitle "channels"
              :bullets ["Form a one-way communcation path way between processes"
-                       "Supported by buffers"
+                       "Supported by buffers (fixed buffers, dropping buffers, sliding buffers)"
                        ]
              }
 
@@ -660,6 +659,8 @@
              :author "Malcolm Sparks"}
 
             {:background "/static/webcam.jpg"}
+
+            {:title "But use values!"}
 
             {:title "Example projects"
              :text "Some free software projects using core.async"}
