@@ -49,7 +49,8 @@
     om/IRender
     (render [_]
       (html
-       [:div {:style {:float "right" :width (if (:custom data) "48%" "100%")}}]))
+       [:div {:style {:float "right" :width (if (:custom data) "48%" "100%")
+                      :font-size (or (get-in data [:code :font-size]) "24pt")} }]))
     om/IDidUpdate
     (did-update [this prev-props prev-state]
       (when (om/get-state owner :text)
@@ -465,7 +466,8 @@
             {:subtitle "channels"
              :custom channels-slide
              :code {:literal "(chan 7)"
-                    :range [10 13]}
+                    :range [10 13]
+                    :font-size "72pt"}
              :opts {:buffer-size 7 :font-size "72pt" :radius 40}}
 
             {:subtitle "put"

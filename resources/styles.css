@@ -7,3 +7,8 @@ section p {
   font-size: 40pt;
   text-align: center;
 }
+
+pre {
+  padding: 2px;
+  margin: 2px;
+}
