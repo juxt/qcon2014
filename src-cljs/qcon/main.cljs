@@ -32,6 +32,63 @@
       (<! (timeout 30))
       (recur (dec c)))))
 
+(defn channels-slide [data owner opts]
+  (reify
+    om/IInitState
+    (init-state [_]
+      (let [buf (buffer (:buffer-size opts))
+            ch (chan buf)]
+        {:buffer-size (:buffer-size opts)
+         :buf buf
+         :ch ch
+         :default-font (:font-size opts)
+         :radius (:radius opts)
+         :pending-put nil}))
+    om/IRender
+    (render [_]
+      (let [bufsize (om/get-state owner :buffer-size)
+            buf (om/get-state owner :buf)
+            ch (om/get-state owner :ch)
+            default-font (om/get-state owner :default-font)
+            radius (om/get-state owner :radius)]
+        (html
+         [:div
+          [:svg {:version "1.1" :width 800 :height 600}
+
+           [:g {:transform "translate(0,0)"}
+
+            ;; Random box
+            [:g {:transform "translate(30,0)"
+                 :onClick (fn [_] (new-random-pick owner))}
+             [:rect
+              {:x 0 :y 65 :width 100 :height 100 :fill "black" :stroke "white" :stroke-width 3}]
+             (when-let [n (om/get-state owner :pending-put)]
+               [:text {:x 20 :y 150 :style {:font-size "64pt"
+                                            :color "white"} :fill "white"} (str n)])]
+
+            ;; Put
+            [:g {:transform "translate(160,65)"
+                 :onClick (fn [_]
+                            (when-let [n (om/get-state owner :pending-put)]
+                              (om/set-state! owner :pending-put nil)
+                              (go
+                                (>! ch (str n))
+                                (new-random-pick owner)
+                                ;; Forces a re-render
+                                (om/set-state! owner :modified (new js/Date)))))}
+             [:rect {:x 0 :y 0 :width 140 :height 100 :fill "black"}]
+             [:text {:x 0 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} ">!"]]
+
+            ;; Buffer
+            (for [x (range bufsize)]
+              [:g {:transform (str "translate(320,65)")}
+               [:g {:transform (str "translate(" (* 70 x) ")")}
+                [:circle {:cx 0 :cy radius :r radius :style {:fill "#224"}}]
+                [:text {:x (- 0 (/ radius 2) 5) :y (* 1.7 radius) :style {:font-size "60pt" :fill "white"}}
+                 (str (aget (.-arr (.-buf buf)) x))]]])
+
+            ]]])))))
+
 (defn put-and-take-slide [data owner opts]
   (reify
     om/IInitState
@@ -276,7 +333,7 @@
            ]]]]))))
 
 (def app-model
-  (atom {:current-slide 6
+  (atom {:current-slide 4
          :slides
          ;; TODO Add cardinal such that each slide has its own number to avoid react warning
          (vec
@@ -300,7 +357,13 @@
 
             {:title "Quick tutorial"}
 
-            {:subtitle "channels (TODO)"}
+            {:subtitle "buffers"
+             :code {:source "cljs/core/async.cljs"
+                    :range [17 34]}}
+
+            {:subtitle "channels"
+             :custom channels-slide
+             :opts {:buffer-size 7 :font-size "72pt" :radius 40}}
 
             ;; TODO Add source code on right hand side of slide
             {:subtitle "put and take"
@@ -310,10 +373,6 @@
             {:subtitle "timeouts"
              :custom timeout-slide
              :opts {:font-size "72pt"}}
-
-            {:subtitle "buffers (TODO)"
-             :code {:source "cljs/core/async.cljs"
-                    :range [10 20]}}
 
             {:subtitle "alts!"
              :custom alts-slide
