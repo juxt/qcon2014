@@ -29,7 +29,7 @@
                   9))]
       (om/set-state! owner :pending-put n))
     (when (pos? c)
-      (<! (timeout 30))
+      (<! (timeout 50))
       (recur (dec c)))))
 
 (defn channels-slide [data owner opts]
@@ -58,26 +58,29 @@
            [:g {:transform "translate(0,0)"}
 
             ;; Random box
-            [:g {:transform "translate(30,0)"
-                 :onClick (fn [_] (new-random-pick owner))}
-             [:rect
-              {:x 0 :y 65 :width 100 :height 100 :fill "black" :stroke "white" :stroke-width 3}]
-             (when-let [n (om/get-state owner :pending-put)]
-               [:text {:x 20 :y 150 :style {:font-size "64pt"
-                                            :color "white"} :fill "white"} (str n)])]
+            (when (:put data)
+              (list
 
-            ;; Put
-            [:g {:transform "translate(160,65)"
-                 :onClick (fn [_]
-                            (when-let [n (om/get-state owner :pending-put)]
-                              (om/set-state! owner :pending-put nil)
-                              (go
-                                (>! ch (str n))
-                                (new-random-pick owner)
-                                ;; Forces a re-render
-                                (om/set-state! owner :modified (new js/Date)))))}
-             [:rect {:x 0 :y 0 :width 140 :height 100 :fill "black"}]
-             [:text {:x 0 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} ">!"]]
+               [:g {:transform "translate(30,0)"
+                    :onClick (fn [_] (new-random-pick owner))}
+                [:rect
+                 {:x 0 :y 65 :width 100 :height 100 :fill "black" :stroke "white" :stroke-width 3}]
+                (when-let [n (om/get-state owner :pending-put)]
+                  [:text {:x 20 :y 150 :style {:font-size "64pt"
+                                               :color "white"} :fill "white"} (str n)])]
+
+               ;; Put
+               [:g {:transform "translate(160,65)"
+                    :onClick (fn [_]
+                               (when-let [n (om/get-state owner :pending-put)]
+                                 (om/set-state! owner :pending-put nil)
+                                 (go
+                                   (>! ch (str n))
+                                   (new-random-pick owner)
+                                   ;; Forces a re-render
+                                   (om/set-state! owner :modified (new js/Date)))))}
+                [:rect {:x 0 :y 0 :width 140 :height 100 :fill "black"}]
+                [:text {:x 0 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} ">!"]]))
 
             ;; Buffer
             (for [x (range bufsize)]
@@ -113,15 +116,17 @@
           [:svg {:version "1.1" :width 800 :height 600}
 
            [:g {:transform "translate(100,0)"}
+
+            ;; Random box
             [:g {:transform "translate(30,0)"
                  :onClick (fn [_] (new-random-pick owner))}
              [:rect
               {:x 0 :y 65 :width 100 :height 100 :fill "black" :stroke "white" :stroke-width 3}]
              (when-let [n (om/get-state owner :pending-put)]
                [:text {:x 20 :y 150 :style {:font-size "64pt"
-                                            :color "white"} :fill "white"} (str n)])
-             ]
+                                            :color "white"} :fill "white"} (str n)])]
 
+            ;; Put
             [:g {:transform "translate(160,65)"
                  :onClick (fn [_]
                             (when-let [n (om/get-state owner :pending-put)]
@@ -131,32 +136,36 @@
                                 (new-random-pick owner)
                                 ;; Forces a re-render
                                 (om/set-state! owner :modified (new js/Date)))))}
-             [:rect {:x 0 :y 0 :width 140 :height 100 :fill "black"}]
+             [:rect {:x 0 :y 0 :width 100 :height 100 :fill "red"}]
              [:text {:x 0 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} ">!"]]
 
+            ;; Buffer
             (for [x (range bufsize)]
-              [:g {:transform (str "translate(320,320)")}
+              [:g {:transform (str "translate(300,320)")}
                [:g {:transform (str "rotate(" (- (* (- x (/ bufsize 2) (- 1)) (/ 180 bufsize))) ") translate(200)")}
                 [:circle {:cx 0 :cy radius :r radius :style {:fill "#224"}}]
                 [:text {:x (- 0 (/ radius 2) 5) :y (* 1.7 radius) :style {:font-size default-font :fill "white"}}
                  (str (aget (.-arr (.-buf buf)) (mod (+ x (.-head (.-buf buf))) bufsize)))]]])
 
+            ;; Take
             [:g {:transform "translate(160,475)"
                  :onClick (fn [_]
                             (go
                               (om/set-state! owner :last-get (<! ch))
                               (om/set-state! owner :modified (new js/Date))))}
 
-             [:rect {:x 0 :y 0 :width 140 :height 100 :fill "black"}]
+             [:rect {:x 0 :y 0 :width 100 :height 100 :fill "black"}]
              [:text {:x 0 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} "<!"]
 
              ]
+
+            ;; Receive box
             [:g  {:transform "translate(30,475)"}
              [:rect
               {:x 0 :y 0 :width 100 :height 100 :fill "black" :stroke "white" :stroke-width 3}]
              (when-let [n (om/get-state owner :last-get)]
                [:text {:x 20 :y 80 :style {:font-size "64pt"
-                                            :color "white"} :fill "white"} (str n)])]]]])))))
+                                           :color "white"} :fill "white"} (str n)])]]]])))))
 
 (defn timeout-slide [data owner opts]
   (reify
@@ -363,6 +372,11 @@
 
             {:subtitle "channels"
              :custom channels-slide
+             :opts {:buffer-size 7 :font-size "72pt" :radius 40}}
+
+            {:subtitle "putting on a channel"
+             :custom channels-slide
+             :put true
              :opts {:buffer-size 7 :font-size "72pt" :radius 40}}
 
             ;; TODO Add source code on right hand side of slide
