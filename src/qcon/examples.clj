@@ -1,6 +1,6 @@
 ;; Copyright © 2013, JUXT LTD. All Rights Reserved.
 (ns qcon.examples
-  (:require [clojure.core.async :refer (chan buffer >! <! map<)]))
+  (:require [clojure.core.async :refer (chan buffer >! <! map< timeout)]))
 
 (defn put-rnd-no []
   (let [ch (chan 7)]
@@ -22,11 +22,9 @@
     (<! (map< inc ch))
     ))
 
-(defn example-1 []
-  (chan))
-
-(defn example-2 []
-  (chan 10))
-
-(defn example-3 []
-  (chan (buffer)))
+(defn demo-timeout [clicks]
+  (println "READY")
+  (<! clicks)
+  (println "WAITING")
+  (<! (timeout 2000))
+  (println "CLOSED"))

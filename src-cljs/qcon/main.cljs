@@ -274,8 +274,7 @@
   (reify
     om/IInitState
     (init-state [_]
-      {:default-font (:font-size opts)
-       :status "READY"})
+      {:status "READY"})
 
     om/IRender
     (render [_]
@@ -284,15 +283,15 @@
          [:div
           [:svg svg-attrs
            (border)
-           [:text {:x 30 :y 120 :style {:font-size default-font :stroke "white" :fill "white"}} (om/get-state owner :status)]
-           [:g {:transform "translate(70,150)"
+           [:text {:x 30 :y 120 :style {:font-size "50pt" :stroke "white" :fill "white"}} (om/get-state owner :status)]
+           [:g {:transform "translate(10,150)"
                 :onClick (fn [_]
                            (om/set-state! owner :status "WAITING")
                            (go
                              (<! (timeout 2000))
                              (om/set-state! owner :status "CLOSED")))}
-            [:rect {:x 0 :y 0 :width 280 :height 100 :fill "red"}]
-            [:text {:x 30 :y 80 :style {:font-size default-font :stroke "white" :fill "white"}} "(timeout 2000)"]]]])))))
+            [:rect {:x 0 :y 20 :width 340 :height 100 :fill "black" :stroke-width 2 :stroke "white"}]
+            [:text {:x 20 :y 80 :style {:font-size "32pt" :stroke "white" :fill "white"}} "(timeout 2000)"]]]])))))
 
 (defn alts-slide [data owner opts]
   (reify
@@ -597,6 +596,9 @@
 
             {:subtitle "timeouts"
              :custom timeout-slide
+             :code {:source "qcon.examples/demo-timeout"
+                    :lang :clojure
+                    }
              :opts {:font-size "72pt"}}
 
             {:subtitle "alts"
