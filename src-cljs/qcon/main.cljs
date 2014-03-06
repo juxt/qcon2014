@@ -19,6 +19,9 @@
 
 (def debug false)
 
+(def svg-attrs
+  {:version "1.1" :width 540 :height 600})
+
 (defn source-snippet [data owner {}]
   (reify
     om/IWillMount
@@ -115,7 +118,8 @@
             radius (om/get-state owner :radius)]
         (html
          [:div
-          [:svg {:version "1.1" :width 800 :height 600}
+          [:svg svg-attrs
+           (border)
 
            [:g {:transform "translate(0,0)"}
 
@@ -154,8 +158,8 @@
 
             ]]])))))
 
-(defn border [width height]
-  [:rect {:x 0 :y 0 :width width :height height :stroke "#888" :stroke-width 1 :fill "black"}])
+(defn border []
+  [:rect {:x 0 :y 0 :width 540 :height 600 :stroke "#888" :stroke-width 1 :fill "black"}])
 
 (defn put-and-take-slide [data owner opts]
   (reify
@@ -180,9 +184,8 @@
          [:div
           ;;(om/build source-snippet data {})
 
-          [:svg {:version "1.1" :width 540 :height 600}
-
-           (border 540 600)
+          [:svg svg-attrs
+           (border)
 
            [:g {:transform "translate(0,0)"}
 
@@ -257,7 +260,8 @@
       (let [default-font (om/get-state owner :default-font)]
         (html
          [:div
-          [:svg {:version "1.1" :width 800 :height 600}
+          [:svg svg-attrs
+           (border)
            [:text {:x 30 :y 120 :style {:font-size default-font :stroke "white" :fill "white"}} (om/get-state owner :status)]
            [:g {:transform "translate(70,150)"
                 :onClick (fn [_]
@@ -279,7 +283,8 @@
       (let [default-font (om/get-state owner :default-font)]
         (html
          [:div
-          [:svg {:version "1.1" :width 800 :height 600}
+          [:svg svg-attrs
+           (border)
            [:text {:x 30 :y 120 :style {:font-size default-font :stroke "white" :fill "white"}} (om/get-state owner :status)]
            [:g {:transform "translate(70,150)"
                 :onClick (fn [_]
@@ -318,7 +323,8 @@
     (render [_]
       (html
        [:div
-        [:svg {:version "1.1" :width (:width opts) :height (:height opts)}
+        [:svg svg-attrs
+         (border)
          [:g
           [:rect {:x 0 :y 0 :width (:width opts) :height (:height opts) :fill "#222"}]
           ;; Center the diagram
@@ -390,7 +396,8 @@
     (render [_]
       (html
        [:div
-        [:svg {:version "1.1" :width (:width opts) :height (:height opts)}
+        [:svg svg-attrs
+         (border)
          [:g
           [:rect {:x 0 :y 0 :width (:width opts) :height (:height opts) :fill "#222"}]
           ;; Center the diagram
@@ -420,7 +427,7 @@
            ]]]]))))
 
 (def app-model
-  (atom {:current-slide 6
+  (atom {:current-slide 4
          :slides
          ;; TODO Add cardinal such that each slide has its own number to avoid react warning
          (vec
