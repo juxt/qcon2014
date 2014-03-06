@@ -10,7 +10,6 @@
    :jig/project "../qcon/project.clj"
    :jig/dependencies [:stencil-loader]
    :deckjs.dir "../deck.js"
-   :sh.dir "../syntaxhighlighter/pkg"
    }
 
   :cljs-builder

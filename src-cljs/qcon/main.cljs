@@ -354,6 +354,10 @@
              :url "https://github.com/OpenSensorsIO/azondi"
              :bullets ["Builds on MQTT Broker"]}
 
+            {:subtitle "This slide-deck"
+             :url "https://github.com/juxt/qcon"
+             :bullets [""]}
+
             ;; TODO Don't forget to mention Hecuba and Stentor (that they're free software)
             {:title "Q & A"
              :text "(map answer (take n questions))"}
@@ -372,19 +376,24 @@
                :response-format :raw})))
     om/IRender
     (render [_]
+      #_(println "rendering source: " (om/get-state owner :text))
       (html
        [:div]))
     om/IDidUpdate
     (did-update [this prev-props prev-state]
       ;; Attempt at syntax highlighting
-      #_(println (sh.Highlighter.getHtml (om/get-state owner :text)))
-      (let [n (om/get-node owner)]
-        (while (.hasChildNodes n)
-          (.removeChild n (.-lastChild n))))
-      (let [pre (.createElement js/document "pre")]
-        (.setAttribute pre "class" "brush: clojure")
-        (.appendChild pre (.createTextNode js/document (om/get-state owner :text)))
-        (.appendChild (om/get-node owner) pre)))))
+      (println "did-update" (om/get-state owner :text))
+      (println (.-value (hljs.highlightAuto "(foo)")))
+
+      #_(println (SyntaxHighlighter.getHtml (om/get-state owner :text)))
+      (when (om/get-state owner :text)
+        (let [n (om/get-node owner)]
+          (while (.hasChildNodes n)
+            (.removeChild n (.-lastChild n))))
+        (let [pre (.createElement js/document "pre")]
+          (set! (.-innerHTML pre) (.-value (hljs.highlightAuto (om/get-state owner :text))))
+          (.appendChild (om/get-node owner) pre)
+          )))))
 
 (defn slide [data owner current]
   (reify
