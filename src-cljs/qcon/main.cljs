@@ -21,7 +21,7 @@
 (def debug false)
 
 (def diagram-width 480)
-(def diagram-height 580)
+(def diagram-height 560)
 
 (def svg-attrs
   {:version "1.1" :width diagram-width :height diagram-height})
@@ -449,18 +449,23 @@
            ]]]]))))
 
 (def app-model
-  (atom {:current-slide 4
+  (atom {:current-slide 0
          :slides
          ;; TODO Add cardinal such that each slide has its own number to avoid react warning
          (vec
           (map-indexed
            (fn [i m] (assoc m :slideno (str "slide-" (inc i))))
-           [{:title "core.async"
+           [{:title "Adventures with core.async"
+             :author "Malcolm Sparks"
+             }
+
+            {:subtitle "Adventures with core.async"
              :event "QCon 2014"
              :author "Malcolm Sparks"
              :company "JUXT"
              :email "malcolm@juxt.pro"
              :twitter "@malcolmsparks"
+             :slides "https://qcon.juxt.pro:8000"
              }
 
             {:subtitle "What is core.async?"
@@ -471,15 +476,36 @@
                        "Available in Clojure and ClojureScript"]
              }
 
+            {:subtitle "Communicating Sequential Processes?"
+             :bullets ["Clojure library released May 2013"
+                       "Based on Communicating Sequential Processes"
+                       "Available in Clojure and ClojureScript"]
+             }
+
+            {:subtitle "What is core.async?"
+             :background "/static/cspdiag.jpg"
+             }
+
+            {:subtitle "What is core.async?"
+             :background "/static/webcam.jpg"
+             :bullets ["Sugary substance used for all kinds of purposes"
+                       ]
+             }
+
+
             {:title "But what is core.async?"}
+
+            {:title "Warning: Code ahead!"
+             :warning true}
+
+            {:background "/static/bus2.jpg"}
+
+            {:title "Warning: Live code ahead!"
+             :warning true}
 
             #_{:subtitle "buffers"
                :code {:source "cljs/core/async.cljs"
                     :range [17 34]}}
-
-            {:subtitle "channels"
-
-             }
 
             {:subtitle "channels"
              :custom channels-slide
@@ -557,6 +583,8 @@
             {:title "Why core.async?"
              :text "(it's about decoupling)"}
 
+            {:blockquote "If we de-couple, we can re-use."}
+
             {:title "References"
              :text "Some free software projects using core.async"}
 
@@ -609,7 +637,8 @@
 
            (when-let [title (:title data)]
              [:div
-              [:h1 title]
+              [:h1 (when (:warning data) {:style {:color "red"
+                                                  :text-shadow "0 0 50px #fa0, 0 0 3px #fff"}}) title]
               [:p (:text data)]]
              )
 
@@ -629,6 +658,7 @@
               [:h3 (:company data)]
               [:h3 (:email data)]
               [:h3 (:twitter data)]
+              [:h3 [:a {:href (:slides data)} (:slides data)]]
               ]
              )
 
