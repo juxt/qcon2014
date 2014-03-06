@@ -519,7 +519,7 @@
                       :range [17 34]}}
 
             {:subtitle "channels"
-             :bullets ["Form a one-way communcation path way between processes"
+             :bullets ["Form a one-way communcation pathway between processes"
                        "Supported by buffers (fixed buffers, dropping buffers, sliding buffers)"
                        ]
              }
