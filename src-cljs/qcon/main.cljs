@@ -159,7 +159,7 @@
             ;; Buffer
             (for [x (range bufsize)]
               [:g {:transform (str "translate(320,65)")}
-               [:g {:transform (str "translate(" (* 70 x) ")")}
+               [:g {:transform (str "translate(0," (* 70 x) ")")}
                 [:circle {:cx 0 :cy radius :r radius :style {:fill "#224"}}]
                 [:text {:x (- 0 (/ radius 2) 5) :y (* 1.7 radius) :style {:font-size "60pt" :fill "white"}}
                  (str (aget (.-arr (.-buf buf)) x))]]])
@@ -464,15 +464,28 @@
                     :range [17 34]}}
 
             {:subtitle "channels"
+
+             }
+
+            {:subtitle "channels"
+             :custom channels-slide
+             :code {:literal "(chan)"
+                    :font-size "50pt"}
+             :opts {:buffer-size 1 :font-size "72pt" :radius 40}}
+
+            {:subtitle "channels"
              :custom channels-slide
              :code {:literal "(chan 7)"
-                    :range [10 13]
-                    :font-size "72pt"}
+                    :font-size "50pt"}
              :opts {:buffer-size 7 :font-size "72pt" :radius 40}}
 
             {:subtitle "put"
              :custom channels-slide
              :put true
+             :code {:literal "(>! (chan 7)
+  (inc (rand-int 9)))"
+                    :font-size "40pt"}
+
              :opts {:buffer-size 7 :font-size "72pt" :radius 40}}
 
             ;; TODO Add source code on right hand side of slide

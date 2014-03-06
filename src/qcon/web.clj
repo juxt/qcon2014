@@ -47,10 +47,12 @@
             (str text))))
       (throw (ex-info (format "Nil resource: %s" filepath) {})))))
 
+;; (println (source-fn (find-var (symbol "qcon.examples/example-1"))))
+
 (defresource source-resource []
   :available-media-types #{"text/html" "text/plain"}
-  :handle-ok (fn [{{mtype :media-type} :representation}]
-               (let [text (source-fn #'qcon.examples/example-1)]
+  :handle-ok (fn [{{mtype :media-type} :representation req :request}]
+               (let [text (source-fn (find-var (symbol (:query-string req))))]
                  (case mtype
                    "text/plain"
                    text
