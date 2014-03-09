@@ -40,6 +40,8 @@ functions into a small library.
 
 ## Config
 
+
+
 ```
 #=(eval
    (-> (clojure.core/read-string (slurp "/home/malcolm/src/qcon/config.clj"))

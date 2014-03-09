@@ -4,9 +4,9 @@
    [bidi.bidi :refer (->Redirect ->Resources ->Files) :as bidi]
    [jig.bidi :refer (add-bidi-routes)]
    [clojure.java.io :as io]
-   [stencil.core :as stencil]
    [hiccup.core :refer (html h)]
    [jig.util :refer (satisfying-dependency)]
+   [ring.util.response :refer (resource-response)]
    [liberator.core :refer (defresource)]
    qcon.examples
    jig)
@@ -15,14 +15,8 @@
    (java.io LineNumberReader InputStreamReader PushbackReader))
   )
 
-(defn index-page [loader plan]
-  (assert loader "Loader is nil")
-  (fn [req]
-    (assert (loader "slides.html") (format "Can't find slides.html, loader is %s" loader))
-    {:status 200 :body (stencil/render (loader "slides.html")
-                                       {:content ""; (slurp plan)
-                                        :title "QCon Presentation"
-                                        :main "qcon.main"})}))
+(defn index-page [req]
+  (resource-response "index.html"))
 
 (defn source-fn
   "Returns a string of the source code for the given symbol, if it can
@@ -60,11 +54,10 @@
                    "text/html"
                    (html [:pre text])))))
 
-(defn make-handlers [loader plan]
+(defn make-handlers []
   (let [p (promise)]
-    @(deliver p {:index (index-page loader plan)
+    @(deliver p {:index index-page
                  :source-resource (source-resource)})))
-
 
 (defn make-routes [config handlers]
   ["/"
@@ -76,24 +69,10 @@
     ["static/" (->Resources {:prefix ""})]
     ]])
 
-(defn get-template-loader [system config]
-  (if-let [{id :jig/id} (satisfying-dependency system config 'jig.stencil/StencilLoader)]
-    (if-let [template-loader (get-in system [id :jig.stencil/loader])]
-      template-loader
-      (throw (ex-info (format "Failed to find lookup template loader in system at path %s"
-                              [id :jig.stencil/loader])
-                      {:path [id :jig.stencil/loader]})))
-    (throw (ex-info (format "Component must depend on a %s component" 'jig.stencil/StencilLoader) {}))
-    )
-  )
-
 (deftype Website [config]
   Lifecycle
   (init [_ system] system)
   (start [_ system]
-    (let [loader (get-template-loader system config)
-          plan (io/file (-> config :jig/project :project-file (.getParentFile)) "plan.org")]
-      (-> system
-          (assoc :loader loader)
-          (add-bidi-routes config (make-routes config (make-handlers loader plan))))))
+    (-> system
+        (add-bidi-routes config (make-routes config (make-handlers)))))
   (stop [_ system] system))
