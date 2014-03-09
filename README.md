@@ -1,6 +1,6 @@
 # QCon slides
 
-An [Om](https://github.com/swannodette/om)-powered HTML slide-deck.
+An [Om](https://github.com/swannodette/om)-powered HTML slide-deck, by Malcolm Sparks.
 
 ## Discussion
 
