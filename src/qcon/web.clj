@@ -64,7 +64,7 @@
    [["index.html" (:index handlers)]
     ["" (->Redirect 307 (:index handlers))]
     ["source" (:source-resource handlers)]
-    ["deck.js/" (->Files {:dir (:deckjs.dir config)})]
+    ["deck.js/" (->Resources {:prefix "deck.js/"})]
     ["hl.js/" (->Resources {:prefix "hl.js/"})]
     ["static/" (->Resources {:prefix ""})]
     ]])
