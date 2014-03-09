@@ -9,7 +9,6 @@
 (ns qcon.main
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require
-;;   qcon.snippets
    [om.core :as om :include-macros true]
    [goog.events.KeyCodes :as kc]
    [om.dom :as dom :include-macros true]
@@ -73,36 +72,6 @@
                       :font-size (or (get-in data [:code :font-size]) "20pt")} }]))
     om/IDidUpdate
     (did-update [this prev-props prev-state]
-      (when (om/get-state owner :text)
-        (let [n (om/get-node owner)]
-          (while (.hasChildNodes n)
-            (.removeChild n (.-lastChild n))))
-        (let [pre (.createElement js/document "pre")]
-          (set! (.-innerHTML pre) (.-value (hljs.highlightAuto (om/get-state owner :text))))
-          (.appendChild (om/get-node owner) pre)
-          )))))
-
-#_(defn clj-source-snippet [data owner fname]
-  (reify
-    om/IWillMount
-    (will-mount [_]
-      (GET "/source"
-          (-> {:handler (fn [e]
-                          (om/set-state! owner :text e))
-               :headers {"Accept" "text/plain"}
-               :response-format :raw})))
-    om/IRender
-    (render [_]
-      #_(println "rendering source: " (om/get-state owner :text))
-      (html
-       [:div]))
-    om/IDidUpdate
-    (did-update [this prev-props prev-state]
-      ;; Attempt at syntax highlighting
-      (println "did-update" (om/get-state owner :text))
-      (println (.-value (hljs.highlightAuto "(foo)")))
-
-      #_(println (SyntaxHighlighter.getHtml (om/get-state owner :text)))
       (when (om/get-state owner :text)
         (let [n (om/get-node owner)]
           (while (.hasChildNodes n)
@@ -207,8 +176,6 @@
             radius (om/get-state owner :radius)]
         (html
          [:div
-          ;;(om/build source-snippet data {})
-
           [:svg svg-attrs
            (border)
 
@@ -222,9 +189,6 @@
              (when-let [n (om/get-state owner :pending-put)]
                [:text {:x 20 :y 150 :style {:font-size "64pt"
                                             :color "white"} :fill "white"} (str n)])]
-
-            ;;
-
 
             ;; Put
             [:g {:transform "translate(160,65)"
