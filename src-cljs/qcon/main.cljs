@@ -381,7 +381,7 @@
             ydelta (/ (- (second to-pos) (second from-pos)) 18)]
 
         (go-loop [i 0]
-          (<! (timeout 30))
+          (<! (timeout 100))
           (om/set-state!
            slide :message
            [(+ (first from-pos) (* i xdelta))
