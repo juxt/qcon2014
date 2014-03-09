@@ -107,5 +107,7 @@ Jig user> (reset)
 
 ```
 
+Now open a browser at `localhost:8000`.
+
 Do a `(reset)` every time you change a file and Jig will recompile the
 modified clojurescript and reload the modified clojure.
