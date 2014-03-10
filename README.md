@@ -80,6 +80,7 @@ mkdir om-slides-example
 cd om-slides-example
 git clone https://github.com/juxt/qcon2014
 git clone https://github.com/juxt/jig
+ln -s qcon2014 qcon
 cd jig
 git checkout 2.0.3
 ```
